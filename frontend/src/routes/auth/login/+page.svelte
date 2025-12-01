@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Separator from "$lib/components/primitives/separator.svelte";
-    import { MailIcon, EyeIcon, KeyRoundIcon, ArrowRightIcon } from "@lucide/svelte";
+    import { MailIcon, EyeIcon, EyeOffIcon, KeyRoundIcon, ArrowRightIcon } from "@lucide/svelte";
     import { Button, Heading, Input, Label, P } from "flowbite-svelte";
 
     let { children } = $props();
@@ -21,7 +21,7 @@
 				class={`ps-10 ${email === '' ? 'text-teal-500' : ''}`}
 				type="text"
 				id="email"
-				placeholder="nama@bisnisumkmku.id"
+				placeholder="nama@bisnisku.id"
 				bind:value={email}
 				required
 			>
@@ -34,9 +34,8 @@
 			<Label for="password" class="mb-2">Password</Label>
 			<Input
 				class={`ps-10 ${password === '' ? 'text-teal-500' : ''}`}
-				type="password"
-				id={passwordVisible ? 'text' : 'password'}
-				placeholder="••••••••"
+				type={passwordVisible ? 'text' : 'password'}
+				placeholder={passwordVisible ? 'supersecret' : '•••••••••••'}
 				bind:value={password}
 				required
 			>
@@ -44,7 +43,17 @@
 					<KeyRoundIcon />
 				{/snippet}
 				{#snippet right()}
-					<EyeIcon />
+					<button
+						type="button"
+						class="outline-none"
+						onclick={() => (passwordVisible = !passwordVisible)}
+					>
+						{#if passwordVisible}
+							<EyeOffIcon />
+						{:else}
+							<EyeIcon />
+						{/if}
+					</button>
 				{/snippet}
 			</Input>
 		</div>
