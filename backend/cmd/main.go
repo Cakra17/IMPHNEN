@@ -10,13 +10,43 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/Cakra17/imphnen/docs"
 	"github.com/Cakra17/imphnen/internal/config"
 	"github.com/Cakra17/imphnen/internal/handlers"
 	md "github.com/Cakra17/imphnen/internal/middleware"
 	"github.com/Cakra17/imphnen/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
+
+// @title           Imphnen API
+// @version         0.1
+// @description     API for managing users, products, and orders
+// @termsOfService  http://swagger.io/terms/
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
+
+// @tag.name Auth
+// @tag.description Authentication endpoints for user registration and login
+
+// @tag.name Users
+// @tag.description Operations related to user management
+// @tag.docs.url https://example.com/docs/users
+// @tag.docs.description User management documentation
+
+// @tag.name Products
+// @tag.description Operations related to product catalog
+// @tag.docs.url https://example.com/docs/products
+
+// @tag.name Orders
+// @tag.description Operations related to order processing
 
 func main() {
 	cfg := config.Load()
@@ -48,7 +78,10 @@ func main() {
 		TokenDuration: time.Hour * 8,
 	})
 
+	// Swagger UI
+
 	r.Route("/api/v1", func(r chi.Router) {
+		r.Get("/docs/*", httpSwagger.WrapHandler)
 
 		r.Post("/auth/login", userHandler.Login)
 		r.Post("/auth/register", userHandler.Register)

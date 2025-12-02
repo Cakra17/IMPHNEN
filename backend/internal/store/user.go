@@ -45,25 +45,3 @@ func (r *UserRepo) GetUserbyEmail(ctx context.Context, email string) (*models.Us
 
 	return user, nil
 }
-
-func (r *UserRepo) Update(ctx context.Context, user models.User) error {
-	query := `UPDATE TABLE users SET email = $1, password_hash = $2, WHERE id = $3`
-
-	_, err := r.db.ExecContext(ctx, query, user.Email, user, user.PasswordHash, user.ID)
-	if err != nil {
-		log.Printf("[ERROR] Failed to update user: %s", err.Error())
-		return err
-	}
-	return nil
-}
-
-func (r *UserRepo) Delete(ctx context.Context, id string) error {
-	query := `DELETE users WHERE id = $1`
-
-	_, err := r.db.ExecContext(ctx, query, id)
-	if err != nil {
-		log.Printf("[ERROR] Failed to delete user: %s", err.Error())
-		return err
-	}
-	return nil
-}

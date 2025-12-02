@@ -32,6 +32,18 @@ func NewUserHandler(cfg UserHandlerConfig) UserHandler {
 	}
 }
 
+// Register godoc
+// @Summary      Register a new user account
+// @Description  Create a new user account with email and password
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      models.AuthPayload  true  "Registration details"
+// @Success      201      {object}  utils.Response{message=string}  "Account created successfully"
+// @Failure      400      {object}  utils.Response{message=string}  "Invalid request data"
+// @Failure      409      {object}  utils.Response{message=string}  "Email already registered"
+// @Failure      500      {object}  utils.Response{message=string}  "Internal server error"
+// @Router       /auth/register [post]
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var payload models.AuthPayload
 	ctx := r.Context()
@@ -73,6 +85,18 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Login godoc
+// @Summary      Login to user account
+// @Description  Authenticate user with email and password, returns access token
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      models.AuthPayload  true  "Login credentials"
+// @Success      200      {object}  utils.Response{data=models.UserResponse}  "Login successful with access token"
+// @Failure      400      {object}  utils.Response{message=string}  "Invalid request data or wrong password"
+// @Failure      404      {object}  utils.Response{message=string}  "User not found"
+// @Failure      500      {object}  utils.Response{message=string}  "Failed to generate token"
+// @Router       /auth/login [post]
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var payload models.AuthPayload
 	ctx := r.Context()
@@ -121,6 +145,17 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Session godoc
+// @Summary      Get current user session
+// @Description  Retrieve the authenticated user's information from their JWT token
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  utils.Response{data=models.SessionResponse}  "Session valid with user data"
+// @Failure      401  {object}  utils.Response{message=string}  "Unauthorized - invalid or missing token"
+// @Failure      404  {object}  utils.Response{message=string}  "User not found"
+// @Router       /users/me [get]
 func (h *UserHandler) Session(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	claims, _ := middleware.GetClaims(ctx)
