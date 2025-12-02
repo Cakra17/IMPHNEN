@@ -8,7 +8,7 @@
 
 <div class="font-jakarta w-screen h-screen bg-stone-50">
 	<div
-		class="sticky top-0 z-50 h-14 lg:h-18 grid grid-cols-3 bg-white w-full items-center px-4 md:px-8 lg:px-24 xl:px-32 border-b-1 border-teal-200 justify-between"
+		class="sticky top-0 z-50 h-14 lg:h-18 grid grid-cols-3 bg-white w-full items-center px-4 md:px-12 lg:px-16 xl:px-24 border-b-1 border-teal-200 justify-between"
 	>
 		<a href="/dashboard" class="flex flex-row items-center gap-2">
 			<Logo size="sm" />
@@ -30,7 +30,7 @@
 			</button>
 		</div>
 	</div>
-	<div class="w-full px-4 md:px-12 lg:px-24 xl:px-32 py-8">
+	<div class="w-full px-4 md:px-12 lg:px-16 xl:px-24 py-8">
 		{@render children()}
 	</div>
 </div>
