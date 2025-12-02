@@ -111,7 +111,7 @@
 <div class="flex flex-col bg-white border border-teal-200 rounded-2xl p-6">
 	<div class="mb-5 flex justify-between">
 		<div class="flex flex-col">
-			<Heading class="text-lg mb-2">Arus Kas</Heading>
+			<Heading class="text-xl mb-1">Arus Kas</Heading>
 			<span class="text-sm mb-2">Pemasukan vs. Pengeluaran</span>
 		</div>
 		<div>
