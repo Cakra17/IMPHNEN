@@ -3,6 +3,8 @@ package models
 type User struct {
 	ID           string `json:"id" db:"id"`
 	Email        string `json:"email" db:"email"`
+	FirstName    string `json:"firstname" db:"first_name"`
+	LastName     string `json:"lastname" db:"last_name"`
 	PasswordHash string `json:"password_hash,omitempty" db:"password_hash"`
 	Created_At   string `json:"created_at,omitempty" db:"created_at"`
 }
@@ -10,6 +12,13 @@ type User struct {
 type AuthPayload struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=8,max=20"`
+}
+
+type RegisterPayload struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8,max=20"`
+	FistName string `json:"firstname" validate:"required"`
+	LastName string `json:"lastname" validate:"required"`
 }
 
 type Token struct {

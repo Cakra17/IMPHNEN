@@ -38,14 +38,14 @@ func NewUserHandler(cfg UserHandlerConfig) UserHandler {
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
-// @Param        request  body      models.AuthPayload  true  "Registration details"
+// @Param        request  body      models.RegisterPayload  true  "Registration details"
 // @Success      201      {object}  utils.Response{message=string}  "Account created successfully"
 // @Failure      400      {object}  utils.Response{message=string}  "Invalid request data"
 // @Failure      409      {object}  utils.Response{message=string}  "Email already registered"
 // @Failure      500      {object}  utils.Response{message=string}  "Internal server error"
 // @Router       /auth/register [post]
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var payload models.AuthPayload
+	var payload models.RegisterPayload
 	ctx := r.Context()
 
 	if err := utils.ParseJson(r, &payload); err != nil {
@@ -70,6 +70,8 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		ID:           id.String(),
 		Email:        payload.Email,
 		PasswordHash: hashedPassword,
+		FirstName:    payload.FistName,
+		LastName:     payload.LastName,
 	}
 
 	err := h.userRepo.Create(ctx, user)
@@ -174,8 +176,10 @@ func (h *UserHandler) Session(w http.ResponseWriter, r *http.Request) {
 		Message: "Session Valid",
 		Data: models.SessionResponse{
 			User: models.User{
-				ID:    user.ID,
-				Email: user.Email,
+				ID:        user.ID,
+				Email:     user.Email,
+				FirstName: user.FirstName,
+				LastName:  user.LastName,
 			},
 		},
 	})

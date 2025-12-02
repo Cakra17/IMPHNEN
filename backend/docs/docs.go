@@ -36,7 +36,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_models.AuthPayload"
+                            "$ref": "#/definitions/models.AuthPayload"
                         }
                     }
                 ],
@@ -46,13 +46,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_utils.Response"
+                                    "$ref": "#/definitions/utils.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_models.UserResponse"
+                                            "$ref": "#/definitions/models.UserResponse"
                                         }
                                     }
                                 }
@@ -64,7 +64,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_utils.Response"
+                                    "$ref": "#/definitions/utils.Response"
                                 },
                                 {
                                     "type": "object",
@@ -82,7 +82,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_utils.Response"
+                                    "$ref": "#/definitions/utils.Response"
                                 },
                                 {
                                     "type": "object",
@@ -100,7 +100,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_utils.Response"
+                                    "$ref": "#/definitions/utils.Response"
                                 },
                                 {
                                     "type": "object",
@@ -136,7 +136,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_models.AuthPayload"
+                            "$ref": "#/definitions/models.RegisterPayload"
                         }
                     }
                 ],
@@ -146,7 +146,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_utils.Response"
+                                    "$ref": "#/definitions/utils.Response"
                                 },
                                 {
                                     "type": "object",
@@ -164,7 +164,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_utils.Response"
+                                    "$ref": "#/definitions/utils.Response"
                                 },
                                 {
                                     "type": "object",
@@ -182,7 +182,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_utils.Response"
+                                    "$ref": "#/definitions/utils.Response"
                                 },
                                 {
                                     "type": "object",
@@ -200,7 +200,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_utils.Response"
+                                    "$ref": "#/definitions/utils.Response"
                                 },
                                 {
                                     "type": "object",
@@ -240,13 +240,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_utils.Response"
+                                    "$ref": "#/definitions/utils.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_models.SessionResponse"
+                                            "$ref": "#/definitions/models.SessionResponse"
                                         }
                                     }
                                 }
@@ -258,7 +258,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_utils.Response"
+                                    "$ref": "#/definitions/utils.Response"
                                 },
                                 {
                                     "type": "object",
@@ -276,7 +276,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_utils.Response"
+                                    "$ref": "#/definitions/utils.Response"
                                 },
                                 {
                                     "type": "object",
@@ -294,7 +294,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_Cakra17_imphnen_internal_models.AuthPayload": {
+        "models.AuthPayload": {
             "type": "object",
             "required": [
                 "email",
@@ -311,15 +311,40 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Cakra17_imphnen_internal_models.SessionResponse": {
+        "models.RegisterPayload": {
             "type": "object",
+            "required": [
+                "email",
+                "firstname",
+                "lastname",
+                "password"
+            ],
             "properties": {
-                "user": {
-                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_models.User"
+                "email": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 8
                 }
             }
         },
-        "github_com_Cakra17_imphnen_internal_models.Token": {
+        "models.SessionResponse": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "$ref": "#/definitions/models.User"
+                }
+            }
+        },
+        "models.Token": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -327,7 +352,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Cakra17_imphnen_internal_models.User": {
+        "models.User": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -336,7 +361,13 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "firstname": {
+                    "type": "string"
+                },
                 "id": {
+                    "type": "string"
+                },
+                "lastname": {
                     "type": "string"
                 },
                 "password_hash": {
@@ -344,18 +375,18 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Cakra17_imphnen_internal_models.UserResponse": {
+        "models.UserResponse": {
             "type": "object",
             "properties": {
                 "token": {
-                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_models.Token"
+                    "$ref": "#/definitions/models.Token"
                 },
                 "user": {
-                    "$ref": "#/definitions/github_com_Cakra17_imphnen_internal_models.User"
+                    "$ref": "#/definitions/models.User"
                 }
             }
         },
-        "github_com_Cakra17_imphnen_internal_utils.Response": {
+        "utils.Response": {
             "type": "object",
             "properties": {
                 "data": {},
