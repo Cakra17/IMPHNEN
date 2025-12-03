@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 case "$1" in
   up|down)
     migrate -verbose -path=./db/migrations -database postgres://admin:adminsecret@localhost:5432/imphnen?sslmode=disable $1
