@@ -15,8 +15,10 @@ import (
 	"github.com/Cakra17/imphnen/internal/handlers"
 	md "github.com/Cakra17/imphnen/internal/middleware"
 	"github.com/Cakra17/imphnen/internal/store"
+	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -41,8 +43,8 @@ import (
 // @tag.docs.url https://example.com/docs/users
 // @tag.docs.description User management documentation
 
-// @tag.name Products
-// @tag.description Operations related to product catalog
+// @tag.name Receipt
+// @tag.description Operations related to receipt
 // @tag.docs.url https://example.com/docs/products
 
 // @tag.name Orders
@@ -58,6 +60,15 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
 
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+
 	r.Use(middleware.Timeout(time.Minute))
 
 	server := &http.Server{
@@ -69,8 +80,13 @@ func main() {
 	}
 
 	db := config.ConnectDB(cfg.DSN)
+	cld, err := cloudinary.NewFromParams(cfg.CloudinaryName, cfg.CloudinaryApiKey, cfg.CLoudinaryApiSecret)
+	if err != nil {
+		log.Fatalf("Failed connect to cloudinary service: %v", err)
+	}
 
 	userRepo := store.NewUserRepo(db)
+	receiptRepo := store.NewReceiptRepo(db)
 
 	userHandler := handlers.NewUserHandler(handlers.UserHandlerConfig{
 		UserRepo:      userRepo,
@@ -78,7 +94,10 @@ func main() {
 		TokenDuration: time.Hour * 8,
 	})
 
-	// Swagger UI
+	receiptHandler := handlers.NewReceiptHandler(handlers.ReceiptHandlerConfig{
+		ReceiptRepo: receiptRepo,
+		Cld:         cld,
+	})
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/docs/*", httpSwagger.WrapHandler)
@@ -89,6 +108,13 @@ func main() {
 		r.Route("/users", func(r chi.Router) {
 			r.Use(md.Auth)
 			r.Get("/me", userHandler.Session)
+		})
+
+		r.Route("/receipts", func(r chi.Router) {
+			r.Use(md.Auth)
+			r.Post("/", receiptHandler.CreateReceipt)
+			r.Get("/", receiptHandler.GetReceipts)
+			r.Get("/{id}", receiptHandler.GetReceiptByID)
 		})
 	})
 
