@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/Cakra17/imphnen/internal/models"
 	"github.com/Cakra17/imphnen/internal/store"
 	"github.com/Cakra17/imphnen/internal/utils"
+	"github.com/Cakra17/imphnen/internal/validation"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -53,6 +55,17 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 			Message: "Data yang dikirim tidak sesuai",
 		})
 		return
+	}
+
+	if err := validation.Validate(payload); err != nil {
+		if errs, ok := err.(validation.ValidationErrors); ok {
+			for _, e := range errs {
+				utils.ResponseJson(w, http.StatusBadRequest, utils.Response{
+					Message: fmt.Sprintf("%s %s", e.Field, e.Message),
+				})
+				return
+			}
+		}
 	}
 
 	userExist, _ := h.userRepo.GetUserbyEmail(ctx, payload.Email)
@@ -108,6 +121,17 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 			Message: "Data yang dikirim tidak sesuai",
 		})
 		return
+	}
+
+	if err := validation.Validate(payload); err != nil {
+		if errs, ok := err.(validation.ValidationErrors); ok {
+			for _, e := range errs {
+				utils.ResponseJson(w, http.StatusBadRequest, utils.Response{
+					Message: fmt.Sprintf("%s %s", e.Field, e.Message),
+				})
+				return
+			}
+		}
 	}
 
 	user, _ := h.userRepo.GetUserbyEmail(ctx, payload.Email)
