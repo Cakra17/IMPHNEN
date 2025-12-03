@@ -6,30 +6,36 @@ import (
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 type Config struct {
-	Port      string
-	DSN       string
-	JWTSecret string
+	Port                string
+	DSN                 string
+	JWTSecret           string
+	KolosalApiKey       string
+	CloudinaryName      string
+	CloudinaryApiKey    string
+	CLoudinaryApiSecret string
 }
 
 func Load() Config {
-	return Config{
-		Port:      getEnvWithDefaultValue("PORT", ":6969"),
-		DSN:       getEnvWithDefaultValue("DSN", "postgres://admin:adminsecret@localhost:5432/imphnen?sslmode=disable"),
-		JWTSecret: getEnvWithDefaultValue("JWT_SECRET", "secret"),
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Failed to load .env file: %v", err)
 	}
-}
 
-func getEnvWithDefaultValue(key string, defaultValue string) string {
-	res := os.Getenv(key)
-	if res == "" {
-		os.Setenv(key, defaultValue)
-		return defaultValue
+	log.Println("Env setup finished")
+	return Config{
+		Port:                os.Getenv("PORT"),
+		DSN:                 os.Getenv("DSN"),
+		JWTSecret:           os.Getenv("JWT_SECRET"),
+		KolosalApiKey:       os.Getenv("KOLOSAL_API_KEY"),
+		CloudinaryName:      os.Getenv("CLOUDINARY_NAME"),
+		CloudinaryApiKey:    os.Getenv("CLOUDINARY_API_KEY"),
+		CLoudinaryApiSecret: os.Getenv("CLODINARY_API_SECRET"),
 	}
-	return res
 }
 
 func ConnectDB(dsn string) *sql.DB {

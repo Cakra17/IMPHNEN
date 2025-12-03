@@ -140,8 +140,10 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 				AccessToken: token,
 			},
 			User: models.User{
-				ID:    user.ID,
-				Email: user.Email,
+				ID:        user.ID,
+				Email:     user.Email,
+				FirstName: user.FirstName,
+				LastName:  user.LastName,
 			},
 		},
 	})
