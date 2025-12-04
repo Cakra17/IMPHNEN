@@ -1,19 +1,27 @@
 <script lang="ts">
 	import Separator from "$lib/components/primitives/separator.svelte";
     import { MailIcon, EyeIcon, EyeOffIcon, KeyRoundIcon, ArrowRightIcon } from "@lucide/svelte";
+	import { redirect } from "@sveltejs/kit";
     import { Button, Heading, Input, Label, P } from "flowbite-svelte";
 
     let { children } = $props();
     let email = $state('');
     let password = $state('');
 	let passwordVisible = $state(false);
+
+	function handleSubmit() {
+		console.log("Mock login:", { email, password });
+
+		// simple redirect
+		window.location.href = "/dashboard";
+	}
 </script>
 
 <div class="flex flex-col gap-3">
 	<Heading tag="h2">Selamat Datang</Heading>
 	<P class="text-teal-800">Masuk. Biarkan resi dan chat berbicara.</P>
 </div>
-<form>
+<form onsubmit={handleSubmit}>
 	<div class="grid gap-6 grid-cols-1">
 		<div>
 			<Label for="email" class="mb-2">Email</Label>
