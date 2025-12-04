@@ -39,19 +39,22 @@ var allowedType map[string]bool = map[string]bool{
 }
 
 type ReceiptHandler struct {
-	receiptRepo store.ReceiptRepo
-	cld         *cloudinary.Cloudinary
+	receiptRepo     store.ReceiptRepo
+	transactionRepo store.TransactionRepo
+	cld             *cloudinary.Cloudinary
 }
 
 type ReceiptHandlerConfig struct {
-	ReceiptRepo store.ReceiptRepo
-	Cld         *cloudinary.Cloudinary
+	ReceiptRepo     store.ReceiptRepo
+	TransactionRepo store.TransactionRepo
+	Cld             *cloudinary.Cloudinary
 }
 
 func NewReceiptHandler(cfg ReceiptHandlerConfig) ReceiptHandler {
 	return ReceiptHandler{
-		receiptRepo: cfg.ReceiptRepo,
-		cld:         cfg.Cld,
+		receiptRepo:     cfg.ReceiptRepo,
+		transactionRepo: cfg.TransactionRepo,
+		cld:             cfg.Cld,
 	}
 }
 
@@ -155,6 +158,34 @@ func (h *ReceiptHandler) CreateReceipt(w http.ResponseWriter, r *http.Request) {
 	if err := h.receiptRepo.CreateItems(ctx, items); err != nil {
 		utils.ResponseJson(w, http.StatusInternalServerError, utils.Response{
 			Message: "Gagal membuat item receipt",
+		})
+		return
+	}
+
+	// Create Transaction
+	tscID, _ := uuid.NewV7()
+	date, err := time.Parse("2006-01-02", resp.InvoiceDate)
+	if err != nil {
+		utils.ResponseJson(w, http.StatusInternalServerError, utils.Response{
+			Message: "Gagal membuat transaksi",
+		})
+		return
+	}
+
+	tsc := models.Transaction{
+		ID:              tscID.String(),
+		ReceiptID:       &receipt.ID,
+		UserID:          userID,
+		Type:            "expense",
+		Source:          "receipt",
+		Amount:          resp.Total,
+		OrderID:         nil,
+		TransactionDate: date,
+	}
+
+	if err := h.transactionRepo.AddTransaction(ctx, &tsc); err != nil {
+		utils.ResponseJson(w, http.StatusInternalServerError, utils.Response{
+			Message: "Gagal membuat transaksi",
 		})
 		return
 	}
@@ -280,6 +311,33 @@ func (h *ReceiptHandler) GetReceiptByID(w http.ResponseWriter, r *http.Request) 
 		Data: models.ReceiptResponse{
 			Receipt: *receipt,
 			Items:   items,
+		},
+	})
+}
+
+func (h *ReceiptHandler) GetItemsByRecieptID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	receiptID := r.PathValue("id")
+	if receiptID == "" {
+		utils.ResponseJson(w, http.StatusBadRequest, utils.Response{
+			Message: "Receipt ID tidak valid",
+		})
+		return
+	}
+
+	items, err := h.receiptRepo.GetReceiptItemsByReceiptID(ctx, receiptID)
+	if err != nil {
+		utils.ResponseJson(w, http.StatusInternalServerError, utils.Response{
+			Message: "Gagal mengambil item receipt",
+		})
+		return
+	}
+
+	utils.ResponseJson(w, http.StatusOK, utils.Response{
+		Message: "Berhasil mengambil data receipt",
+		Data: models.ItemsResponse{
+			Items: items,
 		},
 	})
 }

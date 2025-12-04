@@ -13,10 +13,10 @@ type Receipt struct {
 }
 
 type ReceiptItem struct {
-	ID        string    `json:"id"`
-	ReceiptID string    `json:"receipt_id"`
-	Name      string    `json:"name"`
-	Price     float64   `json:"price"`
+	ID        string    `json:"id" db:"id"`
+	ReceiptID string    `json:"receipt_id" db:"receipt_id"`
+	Name      string    `json:"name" db:"name"`
+	Price     float64   `json:"price" db:"price"`
 	CreatedAt time.Time `json:"created_at,omitempty" db:"created_at"`
 }
 
@@ -45,6 +45,10 @@ type ReceiptResponse struct {
 
 type ReceiptListResponse struct {
 	Receipts []Receipt `json:"receipts"`
+}
+
+type ItemsResponse struct {
+	Items []ReceiptItem `json:"items"`
 }
 
 type InvoiceItems struct {

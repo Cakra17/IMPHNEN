@@ -43,11 +43,11 @@ import (
 // @tag.docs.url https://example.com/docs/users
 // @tag.docs.description User management documentation
 
-// @tag.name Receipt
+// @tag.name Receipts
 // @tag.description Operations related to receipt
-// @tag.docs.url https://example.com/docs/products
+// @tag.docs.url https://example.com/docs/receipts
 
-// @tag.name Orders
+// @tag.name Transactions
 // @tag.description Operations related to order processing
 
 func main() {
@@ -62,7 +62,7 @@ func main() {
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
@@ -87,6 +87,7 @@ func main() {
 
 	userRepo := store.NewUserRepo(db)
 	receiptRepo := store.NewReceiptRepo(db)
+	transactionRepo := store.NewTransactionRepo(db)
 
 	userHandler := handlers.NewUserHandler(handlers.UserHandlerConfig{
 		UserRepo:      userRepo,
@@ -95,8 +96,13 @@ func main() {
 	})
 
 	receiptHandler := handlers.NewReceiptHandler(handlers.ReceiptHandlerConfig{
-		ReceiptRepo: receiptRepo,
-		Cld:         cld,
+		ReceiptRepo:     receiptRepo,
+		TransactionRepo: transactionRepo,
+		Cld:             cld,
+	})
+
+	transactionHandler := handlers.NewTransactionHandler(handlers.TransactionHandlerConfig{
+		TransactionStore: &transactionRepo,
 	})
 
 	r.Route("/api/v1", func(r chi.Router) {
@@ -115,6 +121,19 @@ func main() {
 			r.Post("/", receiptHandler.CreateReceipt)
 			r.Get("/", receiptHandler.GetReceipts)
 			r.Get("/{id}", receiptHandler.GetReceiptByID)
+			r.Get("/items/{id}", receiptHandler.GetItemsByRecieptID)
+		})
+
+		r.Route("/transactions", func(r chi.Router) {
+			r.Use(md.Auth)
+			r.Post("/", transactionHandler.CreateTransaction)
+			r.Get("/date", transactionHandler.GetTransactionsByDate)
+			r.Get("/range", transactionHandler.GetTransactionsByRange)
+			r.Get("/days", transactionHandler.GetTransactionsByDays)
+			r.Get("/stats", transactionHandler.GetTransactionStats)
+			r.Get("/stats/days", transactionHandler.GetTransactionStatsByDays)
+			r.Get("/type", transactionHandler.GetTransactionsByType)
+			r.Get("/source", transactionHandler.GetTransactionsBySource)
 		})
 	})
 
