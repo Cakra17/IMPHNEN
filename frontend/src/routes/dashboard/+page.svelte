@@ -1,7 +1,7 @@
 <script>
 	import { CameraIcon, ChevronRightIcon, CirclePlusIcon, FileTextIcon, PlusIcon, TrendingDownIcon, TrendingUpIcon } from "@lucide/svelte";
 	import { Card, Heading, Hr, P } from "flowbite-svelte";
-    import { WhatsappSolid } from "flowbite-svelte-icons";
+	import telegramLogo from "../../lib/assets/telegram_logo.svg"
 </script>
 
 <div class="flex-1">
@@ -33,7 +33,7 @@
 			onclick={() => console.log('TODO')}
 			class="cursor-pointer flex-1 flex flex-col md:flex-row gap-4 p-4 items-center shadow-none ring-1 hover:ring-2 ring-teal-200 hover:ring-stone-300 rounded-lg transition-all"
 		>
-			<div class="p-3 bg-stone-100 rounded-full">
+			<div class="w-12 h-12 flex items-center justify-center bg-stone-100 rounded-full">
 				<PlusIcon size={24} />
 			</div>
 			<div class="flex flex-col items-center md:items-start">
@@ -43,9 +43,9 @@
 		</button>
 		<button
 			onclick={() => console.log('TODO')}
-			class="cursor-pointer flex-1 flex flex-col md:flex-row gap-4 p-4 items-center shadow-none ring-1 hover:ring-2 ring-teal-200 hover:ring-sky-300 rounded-lg transition-all"
+			class="cursor-pointer flex-1 flex flex-col md:flex-row gap-4 p-4 items-center shadow-none ring-1 hover:ring-2 ring-teal-200 hover:ring-emerald-300 rounded-lg transition-all"
 		>
-			<div class="p-3 bg-sky-100 rounded-full">
+			<div class="w-12 h-12 flex items-center justify-center bg-emerald-100 rounded-full">
 				<CameraIcon size={24} />
 			</div>
 			<div class="flex flex-col items-center md:items-start">
@@ -55,14 +55,14 @@
 		</button>
 		<button
 			onclick={() => console.log('TODO')}
-			class="cursor-pointer flex-1 flex flex-col md:flex-row gap-4 p-4 items-center shadow-none ring-1 hover:ring-2 ring-teal-200 hover:ring-emerald-300 rounded-lg transition-all"
+			class="cursor-pointer flex-1 flex flex-col md:flex-row gap-4 p-4 items-center shadow-none ring-1 hover:ring-2 ring-teal-200 hover:ring-sky-300 rounded-lg transition-all"
 		>
-			<div class="p-3 bg-emerald-100 rounded-full">
-				<WhatsappSolid class="shrink-0 h-6 w-6" />
+			<div class="bg-emerald-100 rounded-full">
+				<img src={telegramLogo} alt="Telegram" class="shrink-0 h-12 w-12" />
 			</div>
 			<div class="flex flex-col items-center md:items-start">
-				<p class="text-center md:text-left font-semibold">Integrasi WA Business</p>
-				<p class="text-center md:text-left text-xs">Setup bot + Auto-Catat via WA</p>
+				<p class="text-center md:text-left font-semibold">Integrasi Telegram Bot</p>
+				<p class="text-center md:text-left text-xs">Setup bot + terima pesanan via Telegram</p>
 			</div>
 		</button>
 	</div>
