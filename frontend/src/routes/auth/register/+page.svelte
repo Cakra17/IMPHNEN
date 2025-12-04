@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Separator from "$lib/components/primitives/separator.svelte";
     import { MailIcon, EyeIcon, EyeOffIcon, KeyRoundIcon, ArrowRightIcon } from "@lucide/svelte";
+	import { redirect } from "@sveltejs/kit";
     import { Button, Heading, Input, Label, P } from "flowbite-svelte";
 
     let { children } = $props();
@@ -20,13 +21,20 @@
             valid = true;
         }
     })
+
+		function handleSubmit() {
+		console.log("Mock login:", { email, password });
+
+		// simple redirect
+		window.location.href = "/dashboard";
+	}
 </script>
 
 <div class="flex flex-col gap-3">
 	<Heading tag="h2">Buat Akun Baru</Heading>
 	<P class="text-teal-800">Daftar sekarang. Santai pembukuan. Fokus bisnis.</P>
 </div>
-<form>
+<form onsubmit={handleSubmit}>
 	<div class="grid gap-6 grid-cols-2">
 		<div>
 			<Label for="first_name" class="mb-2">Nama Depan</Label>
@@ -92,8 +100,11 @@
 				{/snippet}
 			</Input>
 		</div>
-		<Button type="submit" class="col-span-2 flex flex-row gap-3" disabled={!valid}
-			>Daftar Sekarang<ArrowRightIcon /></Button
+		<Button
+			type="submit"
+			onclick={() => redirect(302, '/dashboard')}
+			class="col-span-2 flex flex-row gap-3"
+			disabled={!valid}>Daftar Sekarang<ArrowRightIcon /></Button
 		>
 	</div>
 </form>
