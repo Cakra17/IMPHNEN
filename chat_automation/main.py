@@ -5,6 +5,8 @@ from flask import Flask, request, jsonify
 import requests
 
 from chat_automation.src.kolosal import completions
+import chat_automation.src.telegram as telegram
+from chat_automation.src.utils.utils import is_complex_json
 
 load_dotenv()
 
@@ -27,7 +29,7 @@ def hello_world():
     # jsonify serializes the Python dictionary into a JSON response
     return jsonify(response), 200
 
-@app.route('/webhook/<uid>', methods=['POST'])
+@app.route('/telegram/webhook/<uid>', methods=['POST'])
 def response_webhook(uid):
     # Get the JSON Payload
     update = request.get_json()
@@ -40,27 +42,29 @@ def response_webhook(uid):
         account_api = accounts.get(uid)
         if account_api == None:
             print(f"Webhook came from unsaved accounts of uid '{uid}'!")
+            return jsonify({"status": "ok"}), 200
+
+        url = f"https://api.telegram.org/bot{account_api}/sendMessage"
+
+        content = completions(user_prompt=text)
+
+        # Parse response json to determine if its a json for backend or text for user
+        if is_complex_json(content):
+            #TODO pass to specific handler
+            pass
         else:
-            url = f"https://api.telegram.org/bot{account_api}/sendMessage"
+            # Handle failed completions api call
+            if content is None:
+                content = "Maaf, sistem chatbot kami sedang ada kendala. Chat kamu sudah diteruskan ke pemilik." #TODO!
 
-            response = completions(user_prompt=text)
-
-            response_payload = {
-                "chat_id": chat_id,
-                "text": response
-            }
-
-            response = requests.post(url, json=response_payload)
-            response.raise_for_status()
-
-            print(f"Message sent with status code: {response.status_code}")
-            print("Response JSON:")
-            print(json.dumps(response.json(), indent=4))
-
-    # Return status ok & status code 200 so telegram knows we have received this.
-    return jsonify({"status": "ok"}), 200
-
-
+            telegram.send_message(
+                api_key=account_api,
+                chat_id=chat_id,
+                content=content
+            )
+        
+        # Return status ok & status code 200 so telegram knows we have received this.
+        return jsonify({"status": "ok"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True, port=8443)

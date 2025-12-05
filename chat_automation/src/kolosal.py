@@ -5,7 +5,7 @@ import requests
 
 completions_url = "https://api.kolosal.ai/v1/chat/completions"
 
-def completions(user_prompt, system_prompt = None, max_tokens = None):
+def completions(user_prompt, system_prompt = None, max_tokens = None) -> str | None :
     # Construct required header
     headers = {
         "Authorization": f"Bearer {os.getenv("KOLOSAL_API_KEY")}",
