@@ -9,6 +9,7 @@ type Receipt struct {
 	TotalItems uint32    `json:"total_items" db:"total_items"`
 	TotalPrice float64   `json:"total" db:"total_price"`
 	ImageURL   string    `json:"image_url" db:"image_url"`
+	PublicID   string    `json:"public_id" db:"public_id"`
 	CreatedAt  time.Time `json:"created_at,omitempty" db:"created_at"`
 }
 

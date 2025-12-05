@@ -1,18 +1,11 @@
 package handlers
 
 import (
-	"bytes"
-	"context"
 	"database/sql"
-	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"math"
-	"mime/multipart"
 	"net/http"
-	"net/textproto"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -22,9 +15,7 @@ import (
 	"github.com/Cakra17/imphnen/internal/models"
 	"github.com/Cakra17/imphnen/internal/store"
 	"github.com/Cakra17/imphnen/internal/utils"
-	"github.com/cloudinary/cloudinary-go/v2"
-	"github.com/cloudinary/cloudinary-go/v2/api"
-	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
+	"github.com/Cakra17/imphnen/pkg/service"
 	"github.com/google/uuid"
 )
 
@@ -41,13 +32,15 @@ var allowedType map[string]bool = map[string]bool{
 type ReceiptHandler struct {
 	receiptRepo     store.ReceiptRepo
 	transactionRepo store.TransactionRepo
-	cld             *cloudinary.Cloudinary
+	cld             service.CloudinaryService
+	kol             service.KolosalService
 }
 
 type ReceiptHandlerConfig struct {
 	ReceiptRepo     store.ReceiptRepo
 	TransactionRepo store.TransactionRepo
-	Cld             *cloudinary.Cloudinary
+	Cld             service.CloudinaryService
+	Kol             service.KolosalService
 }
 
 func NewReceiptHandler(cfg ReceiptHandlerConfig) ReceiptHandler {
@@ -55,6 +48,7 @@ func NewReceiptHandler(cfg ReceiptHandlerConfig) ReceiptHandler {
 		receiptRepo:     cfg.ReceiptRepo,
 		transactionRepo: cfg.TransactionRepo,
 		cld:             cfg.Cld,
+		kol:             cfg.Kol,
 	}
 }
 
@@ -104,7 +98,9 @@ func (h *ReceiptHandler) CreateReceipt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := ocr(media, header.Filename)
+	ctx := r.Context()
+
+	resp, err := h.kol.OCRForm(media, header.Filename)
 	if err != nil {
 		log.Printf("[ERROR] %s", err.Error())
 		utils.ResponseJson(w, http.StatusInternalServerError, utils.Response{
@@ -113,8 +109,7 @@ func (h *ReceiptHandler) CreateReceipt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	secureUrl, err := h.uploadImage(ctx, media)
+	secureUrl, publidID, err := h.cld.UploadMedia(ctx, "receipts", media)
 	if err != nil {
 		utils.ResponseJson(w, http.StatusBadRequest, utils.Response{
 			Message: "Terjadi kesalahan dalam menyimpan gambar",
@@ -133,9 +128,11 @@ func (h *ReceiptHandler) CreateReceipt(w http.ResponseWriter, r *http.Request) {
 		TotalItems: uint32(len(resp.InvoiceItems)),
 		TotalPrice: resp.Total,
 		ImageURL:   secureUrl,
+		PublicID:   publidID,
 	}
 
-	if err := h.receiptRepo.Create(ctx, receipt); err != nil {
+	if err := h.receiptRepo.Create(ctx, &receipt); err != nil {
+		h.cld.DeleteMedia(ctx, publidID)
 		utils.ResponseJson(w, http.StatusInternalServerError, utils.Response{
 			Message: "Gagal membuat receipt",
 		})
@@ -340,117 +337,4 @@ func (h *ReceiptHandler) GetItemsByRecieptID(w http.ResponseWriter, r *http.Requ
 			Items: items,
 		},
 	})
-}
-
-func (h *ReceiptHandler) uploadImage(ctx context.Context, image multipart.File) (string, error) {
-	if seeker, ok := image.(io.Seeker); ok {
-		if _, err := seeker.Seek(0, io.SeekStart); err != nil {
-			log.Printf("[ERROR] Failed to seek file: %v", err)
-			return "", fmt.Errorf("failed to reset file pointer: %w", err)
-		}
-	}
-
-	resp, err := h.cld.Upload.Upload(ctx, image, uploader.UploadParams{
-		Folder:         "imphnen",
-		UniqueFilename: api.Bool(true),
-		UseFilename:    api.Bool(true),
-		ResourceType:   "image",
-	})
-	if err != nil {
-		log.Printf("[ERROR] Failed to upload photo to claudinary: %v", err)
-		return "", fmt.Errorf("Failed to save photo: %s", err.Error())
-	}
-
-	return resp.SecureURL, nil
-}
-
-func ocr(image multipart.File, filename string) (models.OCR, error) {
-	apiKey := os.Getenv("KOLOSAL_API_KEY")
-	if apiKey == "" {
-		return models.OCR{}, fmt.Errorf("KOLOSAL_API_KEY not set")
-	}
-
-	if seeker, ok := image.(io.Seeker); ok {
-		if _, err := seeker.Seek(0, io.SeekStart); err != nil {
-			return models.OCR{}, fmt.Errorf("failed to seek file: %w", err)
-		}
-	}
-
-	buffer := make([]byte, 512)
-	n, err := image.Read(buffer)
-	if err != nil && err != io.EOF {
-		return models.OCR{}, fmt.Errorf("failed to read file for type detection: %w", err)
-	}
-
-	contentType := http.DetectContentType(buffer[:n])
-
-	if seeker, ok := image.(io.Seeker); ok {
-		if _, err := seeker.Seek(0, io.SeekStart); err != nil {
-			return models.OCR{}, fmt.Errorf("failed to seek file: %w", err)
-		}
-	}
-
-	if !strings.HasPrefix(contentType, "image/") {
-		return models.OCR{}, fmt.Errorf("file is not an image, detected type: %s", contentType)
-	}
-
-	var body bytes.Buffer
-	writer := multipart.NewWriter(&body)
-
-	h := make(textproto.MIMEHeader)
-	h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="image"; filename="%s"`, filename))
-	h.Set("Content-Type", contentType)
-
-	part, err := writer.CreatePart(h)
-	if err != nil {
-		return models.OCR{}, fmt.Errorf("failed to create form file: %w", err)
-	}
-
-	if _, err := io.Copy(part, image); err != nil {
-		return models.OCR{}, fmt.Errorf("failed to copy image data: %w", err)
-	}
-
-	if err := writer.WriteField("invoice", "true"); err != nil {
-		return models.OCR{}, fmt.Errorf("failed to write invoice field: %w", err)
-	}
-
-	if err := writer.Close(); err != nil {
-		return models.OCR{}, fmt.Errorf("failed to close multipart writer: %w", err)
-	}
-
-	req, err := http.NewRequest("POST", "https://api.kolosal.ai/ocr/form", &body)
-	if err != nil {
-		return models.OCR{}, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
-
-	client := http.Client{
-		Timeout: 30 * time.Second,
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return models.OCR{}, fmt.Errorf("OCR API request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return models.OCR{}, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return models.OCR{}, fmt.Errorf("OCR API returned status %d: %s",
-			resp.StatusCode, string(respBody))
-	}
-
-	var payload models.OCR
-	if err := json.Unmarshal(respBody, &payload); err != nil {
-		return models.OCR{}, fmt.Errorf("failed to decode OCR response: %w, body: %s",
-			err, string(respBody))
-	}
-
-	return payload, nil
 }

@@ -15,7 +15,7 @@ import (
 	"github.com/Cakra17/imphnen/internal/handlers"
 	md "github.com/Cakra17/imphnen/internal/middleware"
 	"github.com/Cakra17/imphnen/internal/store"
-	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/Cakra17/imphnen/pkg/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -49,6 +49,15 @@ import (
 
 // @tag.name Transactions
 // @tag.description Operations related to order processing
+// @tag.docs.url https://example.com/docs/transactions
+
+// @tag.name Product
+// @tag.description Operations related to pruduct management
+// @tag.docs.url https://example.com/docs/products
+
+// @tag.name Orders
+// @tag.description Operations related to order management
+// @tag.docs.url https://example.com/docs/orders
 
 func main() {
 	cfg := config.Load()
@@ -80,14 +89,18 @@ func main() {
 	}
 
 	db := config.ConnectDB(cfg.DSN)
-	cld, err := cloudinary.NewFromParams(cfg.CloudinaryName, cfg.CloudinaryApiKey, cfg.CLoudinaryApiSecret)
+	cld, err := service.NewCloudinaryService(cfg.CloudinaryName, cfg.CloudinaryApiKey, cfg.CLoudinaryApiSecret, "imphnen")
 	if err != nil {
-		log.Fatalf("Failed connect to cloudinary service: %v", err)
+		log.Fatalf("%s", err.Error())
 	}
+
+	kol := service.NewKolosalService(cfg.KolosalApiKey)
 
 	userRepo := store.NewUserRepo(db)
 	receiptRepo := store.NewReceiptRepo(db)
 	transactionRepo := store.NewTransactionRepo(db)
+	productRepo := store.NewProductRepo(db)
+	orderRepo := store.NewOrderRepo(db)
 
 	userHandler := handlers.NewUserHandler(handlers.UserHandlerConfig{
 		UserRepo:      userRepo,
@@ -99,10 +112,21 @@ func main() {
 		ReceiptRepo:     receiptRepo,
 		TransactionRepo: transactionRepo,
 		Cld:             cld,
+		Kol:             kol,
 	})
 
 	transactionHandler := handlers.NewTransactionHandler(handlers.TransactionHandlerConfig{
 		TransactionStore: &transactionRepo,
+	})
+
+	productHandler := handlers.NewProductHandler(handlers.ProductHandlerConfig{
+		ProductRepo: productRepo,
+		Cld:         cld,
+	})
+
+	orderHandler := handlers.NewOrderHandler(handlers.OrderHandlerConfig{
+		OrderRepo:   orderRepo,
+		ProductRepo: productRepo,
 	})
 
 	r.Route("/api/v1", func(r chi.Router) {
@@ -134,6 +158,24 @@ func main() {
 			r.Get("/stats/days", transactionHandler.GetTransactionStatsByDays)
 			r.Get("/type", transactionHandler.GetTransactionsByType)
 			r.Get("/source", transactionHandler.GetTransactionsBySource)
+		})
+
+		r.Route("/products", func(r chi.Router) {
+			r.Use(md.Auth)
+			r.Post("/", productHandler.CreateProduct)
+			r.Get("/", productHandler.GetProducts)
+			r.Get("/{id}", productHandler.GetProductByID)
+			r.Put("/{id}", productHandler.UpdateProduct)
+			r.Delete("/{id}", productHandler.DeleteProduct)
+		})
+
+		r.Route("/orders", func(r chi.Router) {
+			r.Use(md.Auth)
+			r.Post("/", orderHandler.CreateOrder)
+			r.Get("/", orderHandler.GetOrders)
+			r.Get("/{id}", orderHandler.GetOrderByID)
+			r.Put("/{id}/status", orderHandler.UpdateOrderStatus)
+			r.Delete("/{id}", orderHandler.DeleteOrder)
 		})
 	})
 

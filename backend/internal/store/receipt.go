@@ -16,17 +16,17 @@ func NewReceiptRepo(db *sql.DB) ReceiptRepo {
 	return ReceiptRepo{db: db}
 }
 
-func (r *ReceiptRepo) Create(ctx context.Context, receipt models.Receipt) error {
+func (r *ReceiptRepo) Create(ctx context.Context, receipt *models.Receipt) error {
 	query := `
 		INSERT INTO 
-			receipts (id, user_id, total_items, total_price, store_name, image_url) 
-			VALUES ($1, $2, $3, $4, $5, $6)
+			receipts (id, user_id, total_items, total_price, store_name, image_url, public_id) 
+			VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING created_at
 	`
 	err := r.db.QueryRowContext(ctx, query,
 		receipt.ID, receipt.UserID, receipt.TotalItems,
 		receipt.TotalPrice, receipt.StoreName,
-		receipt.ImageURL,
+		receipt.ImageURL, receipt.PublicID,
 	).Scan(&receipt.CreatedAt)
 	if err != nil {
 		log.Printf("[ERROR] Failed to create receipt: %s", err.Error())

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS receipts (
   total_price NUMERIC(18,2) NOT NULL,
   store_name VARCHAR(255) NOT NULL,
   image_url TEXT NOT NULL,
+  public_id TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT fk_receipts_user
     FOREIGN KEY (user_id)
