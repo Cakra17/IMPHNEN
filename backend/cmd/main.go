@@ -59,6 +59,14 @@ import (
 // @tag.description Operations related to order management
 // @tag.docs.url https://example.com/docs/orders
 
+// @tag.name Customers
+// @tag.description Operations related to customer management
+// @tag.docs.url https://example.com/docs/customers
+
+// @tag.name Telegram
+// @tag.description Telegram bot endpoints for customer operations
+// @tag.docs.url https://example.com/docs/telegram
+
 func main() {
 	cfg := config.Load()
 
@@ -101,6 +109,7 @@ func main() {
 	transactionRepo := store.NewTransactionRepo(db)
 	productRepo := store.NewProductRepo(db)
 	orderRepo := store.NewOrderRepo(db)
+	customerRepo := store.NewCustomerRepo(db)
 
 	userHandler := handlers.NewUserHandler(handlers.UserHandlerConfig{
 		UserRepo:      userRepo,
@@ -125,8 +134,16 @@ func main() {
 	})
 
 	orderHandler := handlers.NewOrderHandler(handlers.OrderHandlerConfig{
+		OrderRepo: orderRepo,
+	})
+
+	telegramHandler := handlers.NewTelegramHandler(handlers.TelegramHandlerConfig{
 		OrderRepo:   orderRepo,
 		ProductRepo: productRepo,
+	})
+
+	customerHandler := handlers.NewCustomerHandler(handlers.CustomerHandlerConfig{
+		CustomerRepo: customerRepo,
 	})
 
 	r.Route("/api/v1", func(r chi.Router) {
@@ -171,11 +188,26 @@ func main() {
 
 		r.Route("/orders", func(r chi.Router) {
 			r.Use(md.Auth)
-			r.Post("/", orderHandler.CreateOrder)
 			r.Get("/", orderHandler.GetOrders)
+			r.Get("/customer/{customer_id}", orderHandler.GetOrdersByCustomer)
 			r.Get("/{id}", orderHandler.GetOrderByID)
-			r.Put("/{id}/status", orderHandler.UpdateOrderStatus)
-			r.Delete("/{id}", orderHandler.DeleteOrder)
+			r.Patch("/{id}/status", orderHandler.UpdateOrderStatus)
+		})
+
+		r.Route("/customers", func(r chi.Router) {
+			r.Use(md.Auth)
+			r.Post("/", customerHandler.CreateCustomer)
+			r.Get("/{id}", customerHandler.GetCustomerByID)
+			r.Put("/{id}", customerHandler.UpdateCustomer)
+			r.Delete("/{id}", customerHandler.DeleteCustomer)
+		})
+
+		r.Route("/telegram", func(r chi.Router) {
+			r.Get("/merchants/{merchant_id}/products", telegramHandler.ListProductsByMerchant)
+			r.Post("/orders", telegramHandler.CreateOrderForCustomer)
+			r.Get("/customers/{customer_id}/orders", telegramHandler.ListCustomerOrders)
+			r.Patch("/orders/{order_id}/cancel", telegramHandler.CancelCustomerOrder)
+			r.Delete("/orders/{order_id}", telegramHandler.DeleteCustomerOrder)
 		})
 	})
 

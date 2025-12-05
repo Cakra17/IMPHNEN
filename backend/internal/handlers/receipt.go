@@ -57,7 +57,7 @@ func NewReceiptHandler(cfg ReceiptHandlerConfig) ReceiptHandler {
 // @Description  Create a new receipt with items for the authenticated user
 // @Tags         Receipts
 // @Accept       x-www-form-urlencoded
-// @Param        image   formData  image  true  "receipt to scan"
+// @Param        image   formData  file  true  "receipt to scan"
 // @Produce      json
 // @Security     BearerAuth
 // @Success      201      {object}  utils.Response{data=models.ReceiptResponse}  "Receipt created successfully"
