@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS transactions CASCADE;
+DROP INDEX IF EXISTS idx_user_date;
+DROP INDEX IF EXISTS idx_user_type;
+DROP INDEX IF EXISTS idx_user_type_date;
+DROP TYPE IF EXISTS type;
+DROP TYPE IF EXISTS source;
