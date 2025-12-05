@@ -10,7 +10,7 @@
 	import { page } from "$app/state";
 </script>
 
-<div class="font-jakarta w-screen h-screen bg-stone-50">
+<div class="font-jakarta w-[99%] h-screen bg-stone-50">
 	<Navbar
 		class="sticky top-0 z-50 h-14 lg:h-18 bg-white w-full items-center px-4 md:px-12 lg:px-16 xl:px-24 border-b-1 border-teal-200 flex flex-row items-center"
 	>

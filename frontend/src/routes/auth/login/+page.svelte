@@ -41,6 +41,7 @@
 		<div>
 			<Label for="password" class="mb-2">Password</Label>
 			<Input
+				id="password"
 				class={`ps-10 ${password === '' ? 'text-teal-500' : ''}`}
 				type={passwordVisible ? 'text' : 'password'}
 				placeholder={passwordVisible ? 'supersecret' : '•••••••••••'}
