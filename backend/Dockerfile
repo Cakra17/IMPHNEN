@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
@@ -8,16 +8,16 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o imphnen .
+RUN CGO_ENABLED=0 GOOS=linux go build -o imphnen ./cmd/main.go
 
 FROM gcr.io/distroless/base-debian11 AS build-release-stage
 
 WORKDIR /app
 
-COPY --from=builder imphnen .
+COPY --from=builder /app/imphnen .
 
 USER nonroot:nonroot
 
-EXPOSE 8080
+EXPOSE 6969
 
-CMD["imphnen"]
+CMD ["./imphnen"]
