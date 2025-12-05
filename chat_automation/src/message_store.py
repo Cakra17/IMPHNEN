@@ -138,7 +138,7 @@ def cleanup_history_task():
                 # Delete them
                 for chat_id in chats_to_delete:
                     del message_history[chat_id]
-                    print(f"[CLEANUP] Cleaned up inactive history for {chat_id}.")   
+                    print(f"[CLEANUP] Cleaned up inactive history for {chat_id}.")
             
             # Print total active chats outside the lock (or use a dedicated logger)
             print(f"[CLEANUP] Total active chats remaining: {len(message_history)}")
