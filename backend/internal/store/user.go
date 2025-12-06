@@ -19,9 +19,17 @@ func NewUserRepo(db *sql.DB) UserRepo {
 
 func (r *UserRepo) Create(ctx context.Context, user models.User) error {
 	query := `
-		INSERT INTO users (id, email, password_hash, first_name, last_name) VALUES ($1, $2, $3, $4, $5) RETURNING created_at 
+		INSERT INTO 
+			users (id, email, password_hash, first_name, last_name, store_name) 
+			VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING created_at 
 	`
-	err := r.db.QueryRowContext(ctx, query, user.ID, user.Email, user.PasswordHash, user.FirstName, user.LastName).Scan(&user.Created_At)
+	err := r.db.QueryRowContext(
+		ctx, query,
+		user.ID, user.Email,
+		user.PasswordHash, user.FirstName,
+		user.LastName, user.StoreName,
+	).Scan(&user.Created_At)
 	if err != nil {
 		log.Printf("[ERROR] Failed to create user: %s", err.Error())
 		return err
@@ -30,10 +38,14 @@ func (r *UserRepo) Create(ctx context.Context, user models.User) error {
 }
 
 func (r *UserRepo) GetUserbyEmail(ctx context.Context, email string) (*models.User, error) {
-	query := `SELECT id, email, password_hash, first_name, last_name FROM users WHERE email = $1`
+	query := `
+	SELECT 
+		id, email, password_hash, first_name, last_name, store_name 
+	FROM users 
+	WHERE email = $1`
 
 	user := &models.User{}
-	err := r.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName)
+	err := r.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName, &user.StoreName)
 	if err == sql.ErrNoRows {
 		log.Printf("[ERROR] Failed to get user: %s", err.Error())
 		return nil, errors.New("User not found")
@@ -44,4 +56,26 @@ func (r *UserRepo) GetUserbyEmail(ctx context.Context, email string) (*models.Us
 	}
 
 	return user, nil
+}
+
+func (r *UserRepo) UpdateUser(ctx context.Context, id string, user models.User) error {
+	query := `
+		UPDATE users SET first_name = $1, last_name = $2, store_name = $3 WHERE id = $4
+	`
+	_, err := r.db.ExecContext(ctx, query, user.FirstName, user.LastName, user.StoreName, id)
+	if err != nil {
+		log.Printf("[ERROR] Failed to update user: %s", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (r *UserRepo) DeleteUser(ctx context.Context, id string) error {
+	query := `DELETE FROM users WHERE id = $1`
+	_, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		log.Printf("[ERROR] Failed to delete user: %s", err.Error())
+		return err
+	}
+	return nil
 }

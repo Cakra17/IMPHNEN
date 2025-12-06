@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -85,6 +86,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		PasswordHash: hashedPassword,
 		FirstName:    payload.FistName,
 		LastName:     payload.LastName,
+		StoreName:    payload.StoreName,
 	}
 
 	err := h.userRepo.Create(ctx, user)
@@ -168,6 +170,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 				Email:     user.Email,
 				FirstName: user.FirstName,
 				LastName:  user.LastName,
+				StoreName: user.StoreName,
 			},
 		},
 	})
@@ -206,8 +209,103 @@ func (h *UserHandler) Session(w http.ResponseWriter, r *http.Request) {
 				Email:     user.Email,
 				FirstName: user.FirstName,
 				LastName:  user.LastName,
+				StoreName: user.StoreName,
 			},
 		},
+	})
+}
+
+// UpdateUser godoc
+// @Summary      Update user profile
+// @Description  Update authenticated user's profile information
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      models.UpdateUserPayload  true  "User update details"
+// @Success      200      {object}  utils.Response{data=models.User}  "Profile updated successfully"
+// @Failure      400      {object}  utils.Response{message=string}  "Invalid request data"
+// @Failure      401      {object}  utils.Response{message=string}  "Unauthorized"
+// @Failure      500      {object}  utils.Response{message=string}  "Internal server error"
+// @Router       /users/me [put]
+func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	var payload models.UpdateUserPayload
+	ctx := r.Context()
+	claims, _ := middleware.GetClaims(ctx)
+
+	userID, _ := claims["user_id"].(string)
+
+	if err := utils.ParseJson(r, &payload); err != nil {
+		utils.ResponseJson(w, http.StatusBadRequest, utils.Response{
+			Message: "Data yang dikirim tidak sesuai",
+		})
+		return
+	}
+
+	if err := validation.Validate(payload); err != nil {
+		if errs, ok := err.(validation.ValidationErrors); ok {
+			for _, e := range errs {
+				utils.ResponseJson(w, http.StatusBadRequest, utils.Response{
+					Message: fmt.Sprintf("%s %s", e.Field, e.Message),
+				})
+				return
+			}
+		}
+	}
+
+	user := models.User{
+		FirstName: payload.FirstName,
+		LastName:  payload.LastName,
+		StoreName: payload.StoreName,
+	}
+
+	err := h.userRepo.UpdateUser(ctx, userID, user)
+	if err != nil {
+		log.Printf("%s", err.Error())
+		utils.ResponseJson(w, http.StatusInternalServerError, utils.Response{
+			Message: "Gagal memperbarui profil",
+		})
+		return
+	}
+
+	utils.ResponseJson(w, http.StatusOK, utils.Response{
+		Message: "Profil berhasil diperbarui",
+		Data: models.User{
+			ID:        userID,
+			FirstName: payload.FirstName,
+			LastName:  payload.LastName,
+			StoreName: payload.StoreName,
+		},
+	})
+}
+
+// DeleteUser godoc
+// @Summary      Delete user account
+// @Description  Delete authenticated user's account permanently
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  utils.Response{message=string}  "Account deleted successfully"
+// @Failure      401  {object}  utils.Response{message=string}  "Unauthorized"
+// @Failure      500  {object}  utils.Response{message=string}  "Internal server error"
+// @Router       /users/me [delete]
+func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	claims, _ := middleware.GetClaims(ctx)
+
+	userID, _ := claims["user_id"].(string)
+
+	err := h.userRepo.DeleteUser(ctx, userID)
+	if err != nil {
+		utils.ResponseJson(w, http.StatusInternalServerError, utils.Response{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	utils.ResponseJson(w, http.StatusOK, utils.Response{
+		Message: "Akun berhasil dihapus",
 	})
 }
 

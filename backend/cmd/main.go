@@ -60,7 +60,7 @@ import (
 // @tag.docs.url https://example.com/docs/orders
 
 // @tag.name Customers
-// @tag.description Operations related to customer management
+// @tag.description Operations related to customer management via Telegram bot
 // @tag.docs.url https://example.com/docs/customers
 
 // @tag.name Telegram
@@ -155,6 +155,8 @@ func main() {
 		r.Route("/users", func(r chi.Router) {
 			r.Use(md.Auth)
 			r.Get("/me", userHandler.Session)
+			r.Put("/{id}", userHandler.UpdateUser)
+			r.Delete("/{id}", userHandler.DeleteUser)
 		})
 
 		r.Route("/receipts", func(r chi.Router) {
@@ -194,20 +196,19 @@ func main() {
 			r.Patch("/{id}/status", orderHandler.UpdateOrderStatus)
 		})
 
-		r.Route("/customers", func(r chi.Router) {
-			r.Use(md.Auth)
-			r.Post("/", customerHandler.CreateCustomer)
-			r.Get("/{id}", customerHandler.GetCustomerByID)
-			r.Put("/{id}", customerHandler.UpdateCustomer)
-			r.Delete("/{id}", customerHandler.DeleteCustomer)
-		})
-
 		r.Route("/telegram", func(r chi.Router) {
 			r.Get("/merchants/{merchant_id}/products", telegramHandler.ListProductsByMerchant)
 			r.Post("/orders", telegramHandler.CreateOrderForCustomer)
 			r.Get("/customers/{customer_id}/orders", telegramHandler.ListCustomerOrders)
 			r.Patch("/orders/{order_id}/cancel", telegramHandler.CancelCustomerOrder)
 			r.Delete("/orders/{order_id}", telegramHandler.DeleteCustomerOrder)
+
+			r.Route("/customers", func(r chi.Router) {
+				r.Post("/", customerHandler.CreateCustomer)
+				r.Get("/{id}", customerHandler.GetCustomerByID)
+				r.Put("/{id}", customerHandler.UpdateCustomer)
+				r.Delete("/{id}", customerHandler.DeleteCustomer)
+			})
 		})
 	})
 
