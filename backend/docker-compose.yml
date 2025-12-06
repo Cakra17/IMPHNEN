@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16.3-alpine
+    container_name: imphnen-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: imphnen
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminsecret
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d imphnen"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: ghcr.io/cakra17/imphnen-backend-service:latest
+    container_name: imphnen-app
+    ports:
+      - "6969:6969"
+    environment:
+      - KOLOSAL_API_KEY=${KOLOSAL_API_KEY}
+      - CLOUDINARY_NAME=${CLOUDINARY_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLODINARY_API_SECRET=S{CLODINARY_API_SECRET}
+      - PORT=${PORT}
+      - DSN=${DSN}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  db-data:
