@@ -16,26 +16,6 @@ services:
       test: ["CMD-SHELL", "pg_isready -U admin -d imphnen"]
       interval: 10s
       timeout: 5s
-      retries: 5
-
-  app:
-    image: ghcr.io/cakra17/imphnen-backend-service:latest
-    container_name: imphnen-app
-    ports:
-      - "6969:6969"
-    environment:
-      - KOLOSAL_API_KEY=${KOLOSAL_API_KEY}
-      - CLOUDINARY_NAME=${CLOUDINARY_NAME}
-      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-      - CLODINARY_API_SECRET=S{CLODINARY_API_SECRET}
-      - PORT=${PORT}
-      - DSN=${DSN}
-      - JWT_SECRET=${JWT_SECRET}
-    env_file:
-      - .env
-    depends_on:
-      postgres:
-        condition: service_healthy
-
+      retries: 5 
 volumes:
   db-data:
