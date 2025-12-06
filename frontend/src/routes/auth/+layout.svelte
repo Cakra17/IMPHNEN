@@ -1,10 +1,10 @@
 <script lang="ts">
-	import Logo from "$lib/components/logo.svelte";
-	import Separator from "$lib/components/primitives/separator.svelte";
-    import { MailIcon, EyeIcon, KeyRoundIcon, ArrowRightIcon, BookXIcon } from "@lucide/svelte";
-    import { Button, Heading, Input, Label, P } from "flowbite-svelte";
+	import Logo from '$lib/components/logo.svelte';
+	import Separator from '$lib/components/primitives/separator.svelte';
+	import { MailIcon, EyeIcon, KeyRoundIcon, ArrowRightIcon, BookXIcon } from '@lucide/svelte';
+	import { Button, Heading, Input, Label, P } from 'flowbite-svelte';
 
-    let { children } = $props();
+	let { children } = $props();
 </script>
 
 <div class="h-screen grid grid-cols-1 lg:grid-cols-2 font-jakarta">
@@ -28,8 +28,9 @@
 	</div>
 	<div class="h-full flex flex-col justify-center px-16 md:px-24 pt-16 pb-8 md:pt-8">
 		<div class="flex-1 flex flex-col gap-8 justify-center w-full">{@render children()}</div>
-		<P size="sm" class="text-teal-500 text-center pt-16"
-			>Made by Cakra & Theerlan for IMPHNEN x Kolosal.Ai Hackathon</P
+		<P size="sm" class="text-teal-500 text-center pt-16">© 2025 IMPHNEN. All rights reserved.</P>
+		<P size="sm" class="text-teal-500 text-center"
+			>Powered by <a href="https://kolosal.ai" class="hover:text-teal-900">Kolosal.ai</a></P
 		>
 	</div>
 </div>

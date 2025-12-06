@@ -1,25 +1,33 @@
 <script>
-	import CashflowChart from "$lib/components/cashflow_chart.svelte";
-	import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, TrendingDownIcon, TrendingUpIcon } from "@lucide/svelte";
-	import { Button, Dropdown, DropdownItem, Heading, Hr, P } from "flowbite-svelte";
-	import { ChevronDownOutline } from "flowbite-svelte-icons";
-
+	import CashflowChart from '$lib/components/cashflow_chart.svelte';
+	import DailyCashflowTable from '$lib/components/daily_cashflow_table.svelte';
+	import {
+		ChevronDownIcon,
+		ChevronLeftIcon,
+		ChevronRightIcon,
+		TrendingDownIcon,
+		TrendingUpIcon
+	} from '@lucide/svelte';
+	import { Button, Dropdown, DropdownItem, Heading, Hr, P } from 'flowbite-svelte';
+	import { ChevronDownOutline } from 'flowbite-svelte-icons';
 </script>
 
 <a
 	href="/dashboard"
-	class="flex flex-row gap-2 font-bold text-teal-600 hover:text-teal-800 hover:underline cursor-pointer"
+	class="flex flex-row gap-2 font-bold text-teal-600 block lg:hidden hover:text-teal-800 hover:underline cursor-pointer"
 	><ChevronLeftIcon />Kembali</a
 >
 <div class="flex-1">
-	<Heading class="text-lg md:text-2xl ml-8 mb-8">Analisa & Statistik</Heading>
+	<Heading class="text-lg md:text-2xl ml-8 lg:ml-0 mb-8">Analisa & Statistik</Heading>
 	<CashflowChart />
 
 	<div class="mt-8 flex flex-col bg-white border border-teal-200 rounded-2xl">
-		<div class="flex justify-between border-b-1 p-6 pb-3 border-teal-200">
+		<div
+			class="flex flex-col md:flex-row items-center justify-between gap-2 border-b-1 p-6 pb-3 border-teal-200"
+		>
 			<div class="flex flex-col">
 				<Heading class="text-xl mb-1">Riwayat Transaksi Harian</Heading>
-				<span class="text-sm mb-2">Detail cashflow lengkap perhari</span>
+				<span class="text-sm hidden md:block mb-2">Detail cashflow lengkap perhari</span>
 			</div>
 			<div class="flex flex-row gap-3 items-center">
 				<button
@@ -33,7 +41,8 @@
 				>
 			</div>
 		</div>
-		<div class="grid grid-cols-2 overflow-hidden">
+		<DailyCashflowTable />
+		<!-- <div class="grid grid-cols-2 overflow-hidden">
 			<div
 				class="pt-4 p-6 border-r border-teal-200 bg-gradient-to-b from-emerald-50 via-white to-white"
 			>
@@ -101,6 +110,6 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div> -->
 	</div>
 </div>
