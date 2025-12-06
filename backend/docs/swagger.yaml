@@ -12,6 +12,22 @@ definitions:
     - email
     - password
     type: object
+  models.CreateCustomerRequest:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - address
+    - id
+    - name
+    - phone
+    type: object
   models.CreateOrderItemRequest:
     properties:
       product_id:
@@ -227,11 +243,14 @@ definitions:
         maxLength: 20
         minLength: 8
         type: string
+      store_name:
+        type: string
     required:
     - email
     - firstname
     - lastname
     - password
+    - store_name
     type: object
   models.SessionResponse:
     properties:
@@ -301,6 +320,19 @@ definitions:
     required:
     - status
     type: object
+  models.UpdateUserPayload:
+    properties:
+      firstname:
+        type: string
+      lastname:
+        type: string
+      store_name:
+        type: string
+    required:
+    - firstname
+    - lastname
+    - store_name
+    type: object
   models.User:
     properties:
       created_at:
@@ -314,6 +346,8 @@ definitions:
       lastname:
         type: string
       password_hash:
+        type: string
+      store_name:
         type: string
     type: object
   models.UserResponse:
@@ -464,154 +498,6 @@ paths:
       summary: Register a new user account
       tags:
       - Auth
-  /customers:
-    post:
-      consumes:
-      - application/json
-      description: Create a new customer with the provided details
-      parameters:
-      - description: Customer details
-        in: body
-        name: customer
-        required: true
-        schema:
-          $ref: '#/definitions/models.Customer'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            allOf:
-            - $ref: '#/definitions/utils.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.Customer'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.Response'
-      security:
-      - BearerAuth: []
-      summary: Create a new customer
-      tags:
-      - Customers
-  /customers/{id}:
-    delete:
-      description: Delete a customer by their ID
-      parameters:
-      - description: Customer ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.Response'
-      security:
-      - BearerAuth: []
-      summary: Delete a customer
-      tags:
-      - Customers
-    get:
-      description: Get a specific customer by their ID
-      parameters:
-      - description: Customer ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/utils.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.Customer'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.Response'
-      security:
-      - BearerAuth: []
-      summary: Get customer by ID
-      tags:
-      - Customers
-    put:
-      consumes:
-      - application/json
-      description: Update an existing customer's details
-      parameters:
-      - description: Customer ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Customer details
-        in: body
-        name: customer
-        required: true
-        schema:
-          $ref: '#/definitions/models.Customer'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/utils.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.Customer'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.Response'
-      security:
-      - BearerAuth: []
-      summary: Update a customer
-      tags:
-      - Customers
   /orders:
     get:
       consumes:
@@ -1141,6 +1027,43 @@ paths:
       summary: Get receipt by ID
       tags:
       - Receipts
+  /telegram/customers:
+    post:
+      consumes:
+      - application/json
+      description: Create a new customer with the provided details for Telegram bot
+        integration
+      parameters:
+      - description: Customer creation details
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCustomerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Customer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Create a new customer
+      tags:
+      - Telegram
+      - Customers
   /telegram/customers/{customer_id}/orders:
     get:
       consumes:
@@ -1189,6 +1112,114 @@ paths:
       summary: List customer orders (Telegram bot)
       tags:
       - telegram
+  /telegram/customers/{id}:
+    delete:
+      description: Delete a customer by their ID for Telegram bot integration
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Delete a customer
+      tags:
+      - Telegram
+      - Customers
+    get:
+      description: Get a specific customer by their ID for Telegram bot integration
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Customer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get customer by ID
+      tags:
+      - Telegram
+      - Customers
+    put:
+      consumes:
+      - application/json
+      description: Update an existing customer's details for Telegram bot integration
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Customer update details
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.Customer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Customer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Update a customer
+      tags:
+      - Telegram
+      - Customers
   /telegram/merchants/{merchant_id}/products:
     get:
       consumes:
@@ -1805,6 +1836,45 @@ paths:
       tags:
       - Transactions
   /users/me:
+    delete:
+      consumes:
+      - application/json
+      description: Delete authenticated user's account permanently
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Delete user account
+      tags:
+      - Users
     get:
       consumes:
       - application/json
@@ -1844,6 +1914,61 @@ paths:
       summary: Get current user session
       tags:
       - Users
+    put:
+      consumes:
+      - application/json
+      description: Update authenticated user's profile information
+      parameters:
+      - description: User update details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - Users
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.
@@ -1875,7 +2000,7 @@ tags:
   externalDocs:
     url: https://example.com/docs/orders
   name: Orders
-- description: Operations related to customer management
+- description: Operations related to customer management via Telegram bot
   externalDocs:
     url: https://example.com/docs/customers
   name: Customers

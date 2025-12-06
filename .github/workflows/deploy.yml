@@ -25,7 +25,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "backend/docker-compose.yml"
           target: "~/app"
-
+          strip_components: 1
       - name: Deploy using SSH
         uses: appleboy/ssh-action@master
         with: 
@@ -100,8 +100,9 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
-          source: "go-deploy"
+          source: "backend/imphnen"
           target: "~/app"
+          strip_components: 1
       - name: Restart service
         uses: appleboy/ssh-action@master
         with:

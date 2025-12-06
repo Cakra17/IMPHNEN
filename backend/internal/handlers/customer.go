@@ -27,16 +27,15 @@ func NewCustomerHandler(cfg CustomerHandlerConfig) CustomerHandler {
 
 // CreateCustomer godoc
 // @Summary Create a new customer
-// @Description Create a new customer with the provided details
-// @Tags Customers
+// @Description Create a new customer with the provided details for Telegram bot integration
+// @Tags Telegram,Customers
 // @Accept json
 // @Produce json
-// @Param customer body models.Customer true "Customer details"
-// @Security BearerAuth
+// @Param customer body models.CreateCustomerRequest true "Customer creation details"
 // @Success 201 {object} utils.Response{data=models.Customer}
 // @Failure 400 {object} utils.Response
 // @Failure 500 {object} utils.Response
-// @Router /customers [post]
+// @Router /telegram/customers [post]
 func (h *CustomerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -82,15 +81,14 @@ func (h *CustomerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 
 // GetCustomerByID godoc
 // @Summary Get customer by ID
-// @Description Get a specific customer by their ID
-// @Tags Customers
+// @Description Get a specific customer by their ID for Telegram bot integration
+// @Tags Telegram,Customers
 // @Produce json
 // @Param id path int true "Customer ID"
-// @Security BearerAuth
 // @Success 200 {object} utils.Response{data=models.Customer}
 // @Failure 400 {object} utils.Response
 // @Failure 404 {object} utils.Response
-// @Router /customers/{id} [get]
+// @Router /telegram/customers/{id} [get]
 func (h *CustomerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	customerIDStr := r.PathValue("id")
@@ -119,18 +117,17 @@ func (h *CustomerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request
 
 // UpdateCustomer godoc
 // @Summary Update a customer
-// @Description Update an existing customer's details
-// @Tags Customers
+// @Description Update an existing customer's details for Telegram bot integration
+// @Tags Telegram,Customers
 // @Accept json
 // @Produce json
 // @Param id path int true "Customer ID"
-// @Param customer body models.Customer true "Customer details"
-// @Security BearerAuth
+// @Param customer body models.Customer true "Customer update details"
 // @Success 200 {object} utils.Response{data=models.Customer}
 // @Failure 400 {object} utils.Response
 // @Failure 404 {object} utils.Response
 // @Failure 500 {object} utils.Response
-// @Router /customers/{id} [put]
+// @Router /telegram/customers/{id} [put]
 func (h *CustomerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	customerIDStr := r.PathValue("id")
@@ -181,16 +178,15 @@ func (h *CustomerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request)
 
 // DeleteCustomer godoc
 // @Summary Delete a customer
-// @Description Delete a customer by their ID
-// @Tags Customers
+// @Description Delete a customer by their ID for Telegram bot integration
+// @Tags Telegram,Customers
 // @Produce json
 // @Param id path int true "Customer ID"
-// @Security BearerAuth
 // @Success 200 {object} utils.Response
 // @Failure 400 {object} utils.Response
 // @Failure 404 {object} utils.Response
 // @Failure 500 {object} utils.Response
-// @Router /customers/{id} [delete]
+// @Router /telegram/customers/{id} [delete]
 func (h *CustomerHandler) DeleteCustomer(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	customerIDStr := r.PathValue("id")
