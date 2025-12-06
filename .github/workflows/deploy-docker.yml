@@ -34,7 +34,7 @@ jobs:
             echo "Starting deployment..."
             echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-            cd ~/app
+            cd ~/app/backend
 
             echo "Creating .env file..."
             cat > .env << EOL
@@ -42,7 +42,7 @@ jobs:
             PORT=${{ secrets.PORT }}
             DSN=${{ secrets.DSN }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
-            CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+            CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}
             CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
             CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
             EOL

@@ -31,6 +31,8 @@ services:
       - PORT=${PORT}
       - DSN=${DSN}
       - JWT_SECRET=${JWT_SECRET}
+    env_file:
+      - .env
     depends_on:
       postgres:
         condition: service_healthy

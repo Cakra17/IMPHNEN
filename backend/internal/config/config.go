@@ -34,7 +34,7 @@ func Load() Config {
 		KolosalApiKey:       os.Getenv("KOLOSAL_API_KEY"),
 		CloudinaryName:      os.Getenv("CLOUDINARY_NAME"),
 		CloudinaryApiKey:    os.Getenv("CLOUDINARY_API_KEY"),
-		CLoudinaryApiSecret: os.Getenv("CLODINARY_API_SECRET"),
+		CLoudinaryApiSecret: os.Getenv("CLOUDINARY_API_SECRET"),
 	}
 }
 
