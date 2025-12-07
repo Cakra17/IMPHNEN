@@ -127,7 +127,8 @@ class OrderConversationHandler:
                     f"📦 Items:\n{items_text}"
                     f"💰 Total: {formatted_price}"
                 )
-            
+                await update.message.reply_text(f"https://imphnen-one.vercel.app/payment/{result["id"]}")
+                 
             context.user_data.clear()
             return ConversationHandler.END
         
