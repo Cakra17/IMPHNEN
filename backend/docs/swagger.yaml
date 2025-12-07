@@ -1399,6 +1399,40 @@ paths:
       summary: Cancel customer order (Telegram bot)
       tags:
       - Telegram
+  /telegram/orders/{order_id}/confirm:
+    patch:
+      consumes:
+      - application/json
+      description: Accpet an order and change stock
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Order'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Accept customer order (Telegram bot)
+      tags:
+      - Telegram
   /transactions:
     post:
       consumes:

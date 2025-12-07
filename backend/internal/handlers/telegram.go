@@ -336,6 +336,78 @@ func (h *TelegramHandler) CancelCustomerOrder(w http.ResponseWriter, r *http.Req
 	})
 }
 
+// AcceptCustomerOrder Accept an order (customer side)
+// @Summary Accept customer order (Telegram bot)
+// @Description Accpet an order and change stock
+// @Tags Telegram
+// @Accept json
+// @Produce json
+// @Param order_id path string true "Order ID"
+// @Success 200 {object} utils.Response{data=models.Order}
+// @Failure 400 {object} utils.Response
+// @Failure 404 {object} utils.Response
+// @Router /telegram/orders/{order_id}/confirm [patch]
+func (h *TelegramHandler) AcceptCustomerOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	orderID := r.PathValue("order_id")
+	if orderID == "" {
+		utils.ResponseJson(w, http.StatusBadRequest, utils.Response{
+			Message: "Order ID diperlukan",
+		})
+		return
+	}
+
+	order, err := h.orderRepo.GetOrderByID(ctx, orderID)
+	if err != nil {
+		if err.Error() == "order not found" {
+			utils.ResponseJson(w, http.StatusNotFound, utils.Response{
+				Message: "Pesanan tidak ditemukan",
+			})
+			return
+		}
+		utils.ResponseJson(w, http.StatusInternalServerError, utils.Response{
+			Message: "Gagal mendapatkan pesanan",
+		})
+		return
+	}
+
+	if order.Status == models.OrderStatusCancelled {
+		utils.ResponseJson(w, http.StatusBadRequest, utils.Response{
+			Message: "Pesanan sudah dibatalkan",
+		})
+		return
+	}
+
+	if order.Status == models.OrderStatusConfirmed {
+		utils.ResponseJson(w, http.StatusBadRequest, utils.Response{
+			Message: "Pesanan sudah diconfirm, tidak dapat melakukannya lagi",
+		})
+		return
+	}
+
+	err = h.orderRepo.UpdateOrderStatus(ctx, orderID, models.OrderStatusConfirmed)
+	if err != nil {
+		utils.ResponseJson(w, http.StatusBadRequest, utils.Response{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	updatedOrder, err := h.orderRepo.GetOrderByID(ctx, orderID)
+	if err != nil {
+		utils.ResponseJson(w, http.StatusInternalServerError, utils.Response{
+			Message: "Gagal mendapatkan data pesanan terbaru",
+		})
+		return
+	}
+
+	utils.ResponseJson(w, http.StatusOK, utils.Response{
+		Message: "Berhasil membatalkan pesanan",
+		Data:    updatedOrder,
+	})
+}
+
 // DeleteCustomerOrder deletes an order (customer side)
 // @Summary Delete customer order (Telegram bot)
 // @Description Delete a pending or cancelled order

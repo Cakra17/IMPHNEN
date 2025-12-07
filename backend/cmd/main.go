@@ -204,6 +204,7 @@ func main() {
 			r.Patch("/orders/{order_id}/cancel", telegramHandler.CancelCustomerOrder)
 			r.Delete("/orders/{order_id}", telegramHandler.DeleteCustomerOrder)
 			r.Get("/merchants", telegramHandler.GetAllMerchants)
+			r.Patch("/orders/{order_id}/confirm", telegramHandler.AcceptCustomerOrder)
 
 			r.Route("/customers", func(r chi.Router) {
 				r.Post("/", customerHandler.CreateCustomer)
