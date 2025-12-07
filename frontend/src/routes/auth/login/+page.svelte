@@ -102,3 +102,8 @@
 		>Daftar Gratis</Heading
 	></a
 >
+<div class="border border-teal-300 rounded-lg overflow-hidden p-4">
+	<Heading tag="h6">For Atmin kalau malas buat akun baru:</Heading>
+	<P>email: timothy@cryptoacademy.co.id</P>
+	<P>pass: akuganteng</P>
+</div>

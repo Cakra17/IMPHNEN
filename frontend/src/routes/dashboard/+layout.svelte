@@ -9,10 +9,18 @@
 	let { data, children } = $props<{ data: LayoutData; children: any }>();
 
 	import { goto } from '$app/navigation';
+	import type { NavItem } from '$lib/types/navitem';
 
 	function handleLogout() {
 		goto('/logout');
 	}
+
+	const navItems: NavItem[] = [
+		{ href: '/dashboard', label: 'Dashboard' },
+		{ href: '/dashboard/orders', label: 'Orderan' },
+		{ href: '/dashboard/analytics', label: 'Analisa' },
+		{ href: '/dashboard/config', label: 'Pengaturan' }
+	];
 </script>
 
 <div class="font-jakarta w-[100%] h-screen overflow-x-hidden bg-stone-50">
@@ -25,7 +33,7 @@
 			<Heading tag="h6" class="hidden md:inline">IMPHNEN</Heading>
 		</a>
 		<!-- Navigation Links -->
-		<ResponsiveNav pathname={page.url.pathname} />
+		<ResponsiveNav pathname={page.url.pathname} topClass={'top-14'} {navItems} />
 
 		<!-- User Profile Section -->
 		<div class="flex-1 flex flex-row py-2 h-full gap-4 justify-end items-center">

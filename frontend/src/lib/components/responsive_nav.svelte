@@ -1,15 +1,17 @@
 <script lang="ts">
+	import type { NavItem } from '$lib/types/navitem';
 	import { ChevronDownIcon, ChevronUpIcon, MenuIcon, XIcon } from '@lucide/svelte';
 
-	let { pathname } = $props<{ pathname: string }>();
-	let mobileMenuOpen = $state(false);
+	interface Props {
+		pathname: string;
+		navItems: NavItem[];
+		classes?: string;
+		topClass: string;
+		justify?: 'start' | 'center' | 'end';
+	}
 
-	const navItems = [
-		{ href: '/dashboard', label: 'Dashboard' },
-		{ href: '/dashboard/orders', label: 'Orderan' },
-		{ href: '/dashboard/analytics', label: 'Analisa' },
-		{ href: '/dashboard/config', label: 'Pengaturan' }
-	];
+	let { pathname, navItems, classes = '', topClass, justify: align = 'center' }: Props = $props();
+	let mobileMenuOpen = $state(false);
 
 	function isActive(href: string) {
 		return pathname === href;
@@ -17,12 +19,12 @@
 </script>
 
 <!-- Desktop Navigation (hidden on mobile) -->
-<ul class="hidden lg:flex flex-1 flex-row gap-4 justify-center items-center">
+<ul class={['hidden lg:flex flex-1 flex-row gap-4 items-center', `justify-${align}`]}>
 	{#each navItems as item}
 		<li>
 			<a
 				href={item.href}
-				class={`hover:text-teal-700 rounded-full py-1.5 px-2.5 transition-colors ${isActive(item.href) ? 'bg-teal-200' : ''}`}
+				class={`hover:text-teal-700 rounded-full py-1.5 px-2.5 transition-colors ${classes} ${isActive(item.href) ? 'bg-teal-200' : ''}`}
 			>
 				{item.label}
 			</a>
@@ -52,7 +54,7 @@
 <!-- Mobile Dropdown Menu -->
 {#if mobileMenuOpen}
 	<div
-		class="lg:hidden absolute top-14 left-0 right-0 bg-white border-b border-teal-200 shadow-lg z-40"
+		class="lg:hidden absolute left-0 right-0 bg-white border-b border-teal-200 shadow-lg z-40 {topClass}"
 	>
 		<ul class="flex flex-col">
 			{#each navItems as item}

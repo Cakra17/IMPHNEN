@@ -106,8 +106,6 @@
 			loading = false;
 		}
 	}
-
-	console.log(data);
 </script>
 
 <div class="flex-1">
@@ -139,7 +137,7 @@
 			onclick={() => (inputModal = true)}
 			class="cursor-pointer flex-1 flex flex-col md:flex-row gap-4 p-4 items-center shadow-none ring-1 hover:ring-2 ring-teal-200 hover:ring-stone-300 rounded-lg transition-all"
 		>
-			<div class="w-12 h-12 flex items-center justify-center bg-stone-100 rounded-full">
+			<div class="shrink-0 w-12 h-12 flex items-center justify-center bg-stone-100 rounded-full">
 				<PlusIcon size={24} />
 			</div>
 			<div class="flex flex-col items-center md:items-start">
@@ -151,7 +149,7 @@
 			onclick={() => (scanModal = true)}
 			class="cursor-pointer flex-1 flex flex-col md:flex-row gap-4 p-4 items-center shadow-none ring-1 hover:ring-2 ring-teal-200 hover:ring-emerald-300 rounded-lg transition-all"
 		>
-			<div class="w-12 h-12 flex items-center justify-center bg-emerald-100 rounded-full">
+			<div class="shrink-0 w-12 h-12 flex items-center justify-center bg-emerald-100 rounded-full">
 				<CameraIcon size={24} />
 			</div>
 			<div class="flex flex-col items-center md:items-start">
@@ -160,15 +158,16 @@
 			</div>
 		</button>
 		<button
-			onclick={() => console.log('TODO')}
 			class="cursor-pointer flex-1 flex flex-col md:flex-row gap-4 p-4 items-center shadow-none ring-1 hover:ring-2 ring-teal-200 hover:ring-sky-300 rounded-lg transition-all"
 		>
-			<div class="bg-emerald-100 rounded-full">
+			<div class="shrink-0 bg-emerald-100 rounded-full">
 				<img src={telegramLogo} alt="Telegram" class="shrink-0 h-12 w-12" />
 			</div>
 			<div class="flex flex-col items-center md:items-start">
-				<p class="text-center md:text-left font-semibold">Integrasi Telegram Bot</p>
-				<p class="text-center md:text-left text-xs">Setup bot + terima pesanan via Telegram</p>
+				<p class="text-center md:text-left font-semibold">@tuankrebbot</p>
+				<p class="text-center md:text-left text-xs">
+					Bot integrasi Telegram. <br /><i>Integrasi custom Bot coming soon</i>
+				</p>
 			</div>
 		</button>
 	</div>

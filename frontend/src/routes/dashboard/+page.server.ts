@@ -9,8 +9,6 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		const txTodayData = await api.get('/transactions/days', cookies, {
 			days: 30
 		});
-		console.log(txTodayData);
-		console.log(summaryData);
 		return {
 			summary: summaryData.data,
 			transactions: txTodayData.data.transactions
@@ -56,8 +54,6 @@ export const actions: Actions = {
 		const form = await request.formData();
 
 		const result = await api.post('/receipts', form, cookies);
-
-		console.log(result);
 
 		return {
 			success: true,
