@@ -7,7 +7,7 @@ A web application that helps small and medium enterprises (MSMEs/UMKM) easily re
 
 ---
 
-[Go to Indonesian Version](/indonesian_ver)
+[Go to Indonesian Version](#indonesian_ver)
 
 ---
 
@@ -219,7 +219,7 @@ Aplikasi web yang membantu pelaku UMKM (Usaha Mikro Kecil Menengah) mencatat not
 
 ---
 
-[Go to English Version](/english_ver)
+[Go to English Version](#english_ver)
 
 ---
 
