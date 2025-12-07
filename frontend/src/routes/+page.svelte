@@ -26,7 +26,13 @@
 				<Button pill size="xl" color="light" class="transition-all" href="/auth/register"
 					>Mulai Sekarang</Button
 				>
-				<Button pill size="xl" color="blue" class="transition-all">Lihat Demo</Button>
+				<Button
+					pill
+					size="xl"
+					color="blue"
+					class="transition-all"
+					href="https://youtu.be/rrdcT1tgvLo">Lihat Demo</Button
+				>
 			</div>
 		</div>
 		<div
