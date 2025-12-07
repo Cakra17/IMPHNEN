@@ -94,6 +94,13 @@ definitions:
       phone:
         type: string
     type: object
+  models.Merchant:
+    properties:
+      merchant_id:
+        type: string
+      merchant_name:
+        type: string
+    type: object
   models.Order:
     properties:
       created_at:
@@ -544,7 +551,7 @@ paths:
       - BearerAuth: []
       summary: Get all orders for merchant
       tags:
-      - orders
+      - Orders
   /orders/{id}:
     get:
       consumes:
@@ -580,7 +587,7 @@ paths:
       - BearerAuth: []
       summary: Get order by ID
       tags:
-      - orders
+      - Orders
   /orders/{id}/status:
     patch:
       consumes:
@@ -627,7 +634,7 @@ paths:
       - BearerAuth: []
       summary: Update order status
       tags:
-      - orders
+      - Orders
   /orders/customer/{customer_id}:
     get:
       consumes:
@@ -669,7 +676,7 @@ paths:
       - BearerAuth: []
       summary: Get orders by customer
       tags:
-      - orders
+      - Orders
   /products:
     get:
       description: Get paginated list of products for the authenticated user
@@ -1111,7 +1118,7 @@ paths:
             $ref: '#/definitions/utils.Response'
       summary: List customer orders (Telegram bot)
       tags:
-      - telegram
+      - Telegram
   /telegram/customers/{id}:
     delete:
       description: Delete a customer by their ID for Telegram bot integration
@@ -1220,6 +1227,32 @@ paths:
       tags:
       - Telegram
       - Customers
+  /telegram/merchants:
+    get:
+      consumes:
+      - application/json
+      description: Get all merchants/users with their ID and store name
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Merchant'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: List all merchants (for Telegram bot)
+      tags:
+      - Telegram
   /telegram/merchants/{merchant_id}/products:
     get:
       consumes:
@@ -1267,7 +1300,7 @@ paths:
             $ref: '#/definitions/utils.Response'
       summary: List products by merchant (for Telegram bot)
       tags:
-      - telegram
+      - Telegram
   /telegram/orders:
     post:
       consumes:
@@ -1302,7 +1335,7 @@ paths:
             $ref: '#/definitions/utils.Response'
       summary: Create order for customer (Telegram bot)
       tags:
-      - telegram
+      - Telegram
   /telegram/orders/{order_id}:
     delete:
       consumes:
@@ -1331,7 +1364,7 @@ paths:
             $ref: '#/definitions/utils.Response'
       summary: Delete customer order (Telegram bot)
       tags:
-      - telegram
+      - Telegram
   /telegram/orders/{order_id}/cancel:
     patch:
       consumes:
@@ -1365,7 +1398,7 @@ paths:
             $ref: '#/definitions/utils.Response'
       summary: Cancel customer order (Telegram bot)
       tags:
-      - telegram
+      - Telegram
   /transactions:
     post:
       consumes:

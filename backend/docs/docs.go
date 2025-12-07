@@ -231,7 +231,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "orders"
+                    "Orders"
                 ],
                 "summary": "Get all orders for merchant",
                 "parameters": [
@@ -308,7 +308,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "orders"
+                    "Orders"
                 ],
                 "summary": "Get orders by customer",
                 "parameters": [
@@ -377,7 +377,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "orders"
+                    "Orders"
                 ],
                 "summary": "Get order by ID",
                 "parameters": [
@@ -438,7 +438,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "orders"
+                    "Orders"
                 ],
                 "summary": "Update order status",
                 "parameters": [
@@ -1186,7 +1186,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "telegram"
+                    "Telegram"
                 ],
                 "summary": "List customer orders (Telegram bot)",
                 "parameters": [
@@ -1422,6 +1422,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/telegram/merchants": {
+            "get": {
+                "description": "Get all merchants/users with their ID and store name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Telegram"
+                ],
+                "summary": "List all merchants (for Telegram bot)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Merchant"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/telegram/merchants/{merchant_id}/products": {
             "get": {
                 "description": "Get all products available from a specific merchant",
@@ -1432,7 +1476,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "telegram"
+                    "Telegram"
                 ],
                 "summary": "List products by merchant (for Telegram bot)",
                 "parameters": [
@@ -1508,7 +1552,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "telegram"
+                    "Telegram"
                 ],
                 "summary": "Create order for customer (Telegram bot)",
                 "parameters": [
@@ -1566,7 +1610,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "telegram"
+                    "Telegram"
                 ],
                 "summary": "Delete customer order (Telegram bot)",
                 "parameters": [
@@ -1610,7 +1654,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "telegram"
+                    "Telegram"
                 ],
                 "summary": "Cancel customer order (Telegram bot)",
                 "parameters": [
@@ -2899,6 +2943,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Merchant": {
+            "type": "object",
+            "properties": {
+                "merchant_id": {
+                    "type": "string"
+                },
+                "merchant_name": {
                     "type": "string"
                 }
             }
