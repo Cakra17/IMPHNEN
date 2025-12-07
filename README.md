@@ -4,6 +4,10 @@
 
 A comprehensive platform designed to help Indonesian UMKM (Micro, Small, and Medium Enterprises) automate financial record-keeping through AI-powered receipt scanning and streamline order management via Telegram bot integration.
 
+## Demo Video
+
+https://github.com/user-attachments/assets/b56591bb-3107-44c5-9c46-c8373de620b5
+
 ## Overview
 
 IMPHNEN addresses two critical pain points for small business owners:
