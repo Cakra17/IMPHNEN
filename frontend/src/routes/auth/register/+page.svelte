@@ -1,46 +1,50 @@
 <script lang="ts">
-	import Separator from "$lib/components/primitives/separator.svelte";
-    import { MailIcon, EyeIcon, EyeOffIcon, KeyRoundIcon, ArrowRightIcon } from "@lucide/svelte";
-	import { redirect } from "@sveltejs/kit";
-    import { Button, Heading, Input, Label, P } from "flowbite-svelte";
+	import Separator from '$lib/components/primitives/separator.svelte';
+	import {
+		MailIcon,
+		EyeIcon,
+		EyeOffIcon,
+		KeyRoundIcon,
+		ArrowRightIcon,
+		StoreIcon
+	} from '@lucide/svelte';
+	import { redirect } from '@sveltejs/kit';
+	import { Button, Heading, Input, Label, P } from 'flowbite-svelte';
+	import type { ActionData } from './$types';
 
-    let { children } = $props();
+	const { form } = $props<{ form: ActionData }>();
 
-    let firstName = $state('');
-    let lastName = $state('');
+	let firstName = $state('');
+	let lastName = $state('');
 
-    let email = $state('');
-    let password = $state('');
-    let passwordVisible = $state(false);
+	let email = $state('');
+	let password = $state('');
+	let passwordVisible = $state(false);
 
-    let valid = $state(false);
-    $effect(() => {
-        if (firstName === '' || lastName === '' || email === '' || password === '') {
-            valid = false;
-        } else {
-            valid = true;
-        }
-    })
+	let storeName = $state('');
 
-		function handleSubmit() {
-		console.log("Mock login:", { email, password });
-
-		// simple redirect
-		window.location.href = "/dashboard";
-	}
+	let valid = $state(false);
+	$effect(() => {
+		if (firstName === '' || lastName === '' || email === '' || password === '') {
+			valid = false;
+		} else {
+			valid = true;
+		}
+	});
 </script>
 
 <div class="flex flex-col gap-3">
 	<Heading tag="h2">Buat Akun Baru</Heading>
 	<P class="text-teal-800">Daftar sekarang. Santai pembukuan. Fokus bisnis.</P>
 </div>
-<form onsubmit={handleSubmit}>
+<form method="POST">
 	<div class="grid gap-6 grid-cols-2">
 		<div>
 			<Label for="first_name" class="mb-2">Nama Depan</Label>
 			<Input
 				type="text"
-				id="first_name"
+				id="firstname"
+				name="firstname"
 				placeholder="John"
 				class={firstName === '' ? 'text-teal-500' : ''}
 				bind:value={firstName}
@@ -51,7 +55,8 @@
 			<Label for="last_name" class="mb-2">Nama Belakang</Label>
 			<Input
 				type="text"
-				id="last_name"
+				id="lastname"
+				name="lastname"
 				placeholder="Doe"
 				class={lastName === '' ? 'text-teal-500' : ''}
 				bind:value={lastName}
@@ -59,11 +64,28 @@
 			/>
 		</div>
 		<div class="col-span-2">
+			<Label for="store_name" class="mb-2">Nama UMKM</Label>
+			<Input
+				class={`ps-10 ${storeName === '' ? 'text-teal-500' : ''}`}
+				type="text"
+				id="store_name"
+				name="store_name"
+				placeholder="Bisnisku"
+				bind:value={storeName}
+				required
+			>
+				{#snippet left()}
+					<StoreIcon />
+				{/snippet}
+			</Input>
+		</div>
+		<div class="col-span-2">
 			<Label for="email" class="mb-2">Email</Label>
 			<Input
 				class={`ps-10 ${email === '' ? 'text-teal-500' : ''}`}
 				type="text"
 				id="email"
+				name="email"
 				placeholder="nama@bisnisku.id"
 				bind:value={email}
 				required
@@ -78,6 +100,8 @@
 			<Input
 				class={`ps-10 ${password === '' ? 'text-teal-500' : ''}`}
 				type={passwordVisible ? 'text' : 'password'}
+				id="password"
+				name="password"
 				placeholder={passwordVisible ? 'supersecret' : '•••••••••••'}
 				bind:value={password}
 				required
@@ -100,11 +124,13 @@
 				{/snippet}
 			</Input>
 		</div>
-		<Button
-			type="submit"
-			onclick={() => redirect(302, '/dashboard')}
-			class="col-span-2 flex flex-row gap-3"
-			disabled={!valid}>Daftar Sekarang<ArrowRightIcon /></Button
+		{#if form?.error}
+			<p class="col-span-2 text-red-600 bg-red-100 p-2 rounded-md text-sm font-medium">
+				{form.error}
+			</p>
+		{/if}
+		<Button type="submit" class="col-span-2 flex flex-row gap-3" disabled={!valid}
+			>Daftar Sekarang<ArrowRightIcon /></Button
 		>
 	</div>
 </form>
