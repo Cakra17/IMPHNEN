@@ -15,10 +15,10 @@
 				<Heading tag="h1" class="text-white">Kelola Bisnis,</Heading>
 				<Heading tag="h1" class="text-emerald-400">Tanpa Mager.</Heading>
 			</div>
-			<Heading tag="h4" class="text-white italic mb-8"
+			<Heading tag="h4" class="text-white italic mb-8 text-center lg:text-left"
 				>Ingin Menjadi Pengusaha Handal Namun Enggan Ngebuku</Heading
 			>
-			<P class="text-white mb-8" size="lg"
+			<P class="text-white mb-8 text-center lg:text-left" size="lg"
 				>Aplikasi pembukuan UMKM yang memahami kamu males ngetik. Tinggal foto struk, langsung
 				tercatat. Orderan dari Telegram? Auto masuk. Semua cashflow terlihat jelas tanpa ribet.</P
 			>
@@ -336,7 +336,7 @@
 	<section
 		class="flex flex-col gap-8 justify-center items-center px-4 md:px-8 lg:px-16 xl:px-36 py-16"
 	>
-		<Heading tag="h4" class="text-white"
+		<Heading tag="h4" class="text-white text-center lg:text-left"
 			>Tunggu apa lagi? Ayo mulai kemudahan perjalanan bisnis <span class="text-emerald-400"
 				>Sekarang!</span
 			></Heading
