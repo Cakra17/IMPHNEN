@@ -112,3 +112,75 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             systemctl restart go-deploy
+
+
+  python-deploy:
+    runs-on: ubuntu-latest
+    needs: go-deploy
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.14.1"
+
+      - name: Install dependencies
+        run: |
+          cd chat_automation
+          pip install -r requirements.txt
+
+      - name: Stop Python service
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            sudo systemctl stop python-app
+
+      - name: Copy Python app to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          source: "chat_automation/*"
+          target: "~/bot"
+          strip_components: 1
+
+      - name: Setup and restart service
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd ~/bot
+
+            echo "Creating application .env file..."
+            cat > .env << EOL
+            BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+            KOLOSAL_API_KEY=${{ secrets.KOLOSAL_API_KEY }}
+            BACKEND_URL=${{ secrets.BACKEND_URL }}
+            EOL
+
+            echo "Setting up virtual environment..."
+            python3 -m venv venv
+            source venv/bin/activate
+
+            echo "Installing dependencies..."
+            pip install --upgrade pip
+            pip install -r requirements.txt
+
+            echo "Restarting service..."
+            sudo systemctl restart python-app
+
+            echo "Checking service status..."
+            sudo systemctl status python-app --no-pager
+
+            echo "Python deployment completed!" 
