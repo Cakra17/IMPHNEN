@@ -1,0 +1,2043 @@
+basePath: /api/v1
+definitions:
+  models.AuthPayload:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 20
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.CreateCustomerRequest:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - address
+    - id
+    - name
+    - phone
+    type: object
+  models.CreateOrderItemRequest:
+    properties:
+      product_id:
+        type: string
+      quantity:
+        minimum: 1
+        type: integer
+    required:
+    - product_id
+    - quantity
+    type: object
+  models.CreateTelegramOrderRequest:
+    properties:
+      customer_id:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/models.CreateOrderItemRequest'
+        type: array
+      merchant_id:
+        type: string
+    required:
+    - customer_id
+    - items
+    type: object
+  models.CreateTransactionPayload:
+    properties:
+      amount:
+        minimum: 0
+        type: number
+      order_id:
+        type: string
+      receipt_id:
+        type: string
+      source:
+        enum:
+        - receipt
+        - bot
+        - manual
+        type: string
+      transaction_date:
+        type: string
+      type:
+        enum:
+        - expense
+        - income
+        type: string
+    required:
+    - amount
+    - source
+    - transaction_date
+    - type
+    type: object
+  models.Customer:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  models.Merchant:
+    properties:
+      merchant_id:
+        type: string
+      merchant_name:
+        type: string
+    type: object
+  models.Order:
+    properties:
+      created_at:
+        type: string
+      customer:
+        $ref: '#/definitions/models.Customer'
+      customer_id:
+        type: string
+      id:
+        type: string
+      order_date:
+        type: string
+      order_items:
+        items:
+          $ref: '#/definitions/models.OrderItem'
+        type: array
+      status:
+        $ref: '#/definitions/models.OrderStatus'
+      total_price:
+        type: number
+      user_id:
+        type: string
+    type: object
+  models.OrderItem:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      order_id:
+        type: string
+      product:
+        $ref: '#/definitions/models.Product'
+      product_id:
+        type: string
+      quantity:
+        type: integer
+      total_price:
+        type: number
+    type: object
+  models.OrderListResponse:
+    properties:
+      orders:
+        items:
+          $ref: '#/definitions/models.Order'
+        type: array
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  models.OrderStatus:
+    enum:
+    - pending
+    - confirmed
+    - cancelled
+    type: string
+    x-enum-varnames:
+    - OrderStatusPending
+    - OrderStatusConfirmed
+    - OrderStatusCancelled
+  models.Product:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      public_id:
+        type: string
+      stock:
+        type: integer
+      user_id:
+        type: string
+    type: object
+  models.ProductListResponse:
+    properties:
+      products:
+        items:
+          $ref: '#/definitions/models.Product'
+        type: array
+    type: object
+  models.Receipt:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      public_id:
+        type: string
+      store_name:
+        type: string
+      total:
+        type: number
+      total_items:
+        type: integer
+      user_id:
+        type: string
+    type: object
+  models.ReceiptItem:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      receipt_id:
+        type: string
+    type: object
+  models.ReceiptListResponse:
+    properties:
+      receipts:
+        items:
+          $ref: '#/definitions/models.Receipt'
+        type: array
+    type: object
+  models.ReceiptResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.ReceiptItem'
+        type: array
+      receipt:
+        $ref: '#/definitions/models.Receipt'
+    type: object
+  models.RegisterPayload:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      password:
+        maxLength: 20
+        minLength: 8
+        type: string
+      store_name:
+        type: string
+    required:
+    - email
+    - firstname
+    - lastname
+    - password
+    - store_name
+    type: object
+  models.SessionResponse:
+    properties:
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  models.Token:
+    properties:
+      access_token:
+        type: string
+    type: object
+  models.Transaction:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      id:
+        type: string
+      order_id:
+        type: string
+      receipt_id:
+        type: string
+      source:
+        type: string
+      transaction_date:
+        type: string
+      type:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.TransactionListResponse:
+    properties:
+      transactions:
+        items:
+          $ref: '#/definitions/models.Transaction'
+        type: array
+    type: object
+  models.TransactionResponse:
+    properties:
+      transaction:
+        $ref: '#/definitions/models.Transaction'
+    type: object
+  models.TransactionStats:
+    properties:
+      average_amount:
+        type: number
+      net_amount:
+        type: number
+      total_expense:
+        type: number
+      total_income:
+        type: number
+      transaction_count:
+        type: integer
+    type: object
+  models.UpdateOrderStatusRequest:
+    properties:
+      status:
+        allOf:
+        - $ref: '#/definitions/models.OrderStatus'
+        enum:
+        - pending
+        - confirmed
+        - cancelled
+    required:
+    - status
+    type: object
+  models.UpdateUserPayload:
+    properties:
+      firstname:
+        type: string
+      lastname:
+        type: string
+      store_name:
+        type: string
+    required:
+    - firstname
+    - lastname
+    - store_name
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      firstname:
+        type: string
+      id:
+        type: string
+      lastname:
+        type: string
+      password_hash:
+        type: string
+      store_name:
+        type: string
+    type: object
+  models.UserResponse:
+    properties:
+      token:
+        $ref: '#/definitions/models.Token'
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  utils.Meta:
+    properties:
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total_data:
+        type: integer
+      total_page:
+        type: integer
+    type: object
+  utils.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+  utils.ResponsePaginate:
+    properties:
+      data: {}
+      message:
+        type: string
+      meta:
+        $ref: '#/definitions/utils.Meta'
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for managing users, products, and orders
+  termsOfService: http://swagger.io/terms/
+  title: Imphnen API
+  version: "0.1"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password, returns access token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AuthPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful with access token
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.UserResponse'
+              type: object
+        "400":
+          description: Invalid request data or wrong password
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "404":
+          description: User not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Failed to generate token
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      summary: Login to user account
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account with email and password
+      parameters:
+      - description: Registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Account created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "409":
+          description: Email already registered
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      summary: Register a new user account
+      tags:
+      - Auth
+  /orders:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve orders with optional filtering by customer and status
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Filter by customer ID
+        in: query
+        name: customer_id
+        type: string
+      - description: Filter by status (pending, confirmed, cancelled)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.ResponsePaginate'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Order'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all orders for merchant
+      tags:
+      - Orders
+  /orders/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific order with its items and customer details
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Order'
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get order by ID
+      tags:
+      - Orders
+  /orders/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Update order status (pending, confirmed, cancelled) with automatic
+        stock restoration
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateOrderStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Order'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update order status
+      tags:
+      - Orders
+  /orders/customer/{customer_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all orders for a specific customer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: customer_id
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.OrderListResponse'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get orders by customer
+      tags:
+      - Orders
+  /products:
+    get:
+      description: Get paginated list of products for the authenticated user
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.ResponsePaginate'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductListResponse'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user products
+      tags:
+      - Product
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new product with image upload
+      parameters:
+      - description: Product image
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Product name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Product price
+        in: formData
+        name: price
+        required: true
+        type: string
+      - description: Product stock
+        in: formData
+        name: stock
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Product'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new product
+      tags:
+      - Product
+  /products/{id}:
+    delete:
+      description: Delete a product by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete a product
+      tags:
+      - Product
+    get:
+      description: Get a specific product by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Product'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get product by ID
+      tags:
+      - Product
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update an existing product with optional image upload
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product image
+        in: formData
+        name: image
+        type: file
+      - description: Product name
+        in: formData
+        name: name
+        type: string
+      - description: Product price
+        in: formData
+        name: price
+        type: string
+      - description: Product stock
+        in: formData
+        name: stock
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Product'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update a product
+      tags:
+      - Product
+  /receipts:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of receipts for the authenticated user
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10)'
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Receipts retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.ResponsePaginate'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ReceiptListResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get paginated receipts
+      tags:
+      - Receipts
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Create a new receipt with items for the authenticated user
+      parameters:
+      - description: receipt to scan
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Receipt created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ReceiptResponse'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new receipt
+      tags:
+      - Receipts
+  /receipts/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific receipt with its items by ID for the authenticated
+        user
+      parameters:
+      - description: Receipt ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Receipt retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ReceiptResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "404":
+          description: Receipt not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get receipt by ID
+      tags:
+      - Receipts
+  /telegram/customers:
+    post:
+      consumes:
+      - application/json
+      description: Create a new customer with the provided details for Telegram bot
+        integration
+      parameters:
+      - description: Customer creation details
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCustomerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Customer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Create a new customer
+      tags:
+      - Telegram
+      - Customers
+  /telegram/customers/{customer_id}/orders:
+    get:
+      consumes:
+      - application/json
+      description: Get all orders for a specific customer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: customer_id
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.ResponsePaginate'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Order'
+                  type: array
+                meta:
+                  $ref: '#/definitions/utils.Meta'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: List customer orders (Telegram bot)
+      tags:
+      - Telegram
+  /telegram/customers/{id}:
+    delete:
+      description: Delete a customer by their ID for Telegram bot integration
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Delete a customer
+      tags:
+      - Telegram
+      - Customers
+    get:
+      description: Get a specific customer by their ID for Telegram bot integration
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Customer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get customer by ID
+      tags:
+      - Telegram
+      - Customers
+    put:
+      consumes:
+      - application/json
+      description: Update an existing customer's details for Telegram bot integration
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Customer update details
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.Customer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Customer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Update a customer
+      tags:
+      - Telegram
+      - Customers
+  /telegram/merchants:
+    get:
+      consumes:
+      - application/json
+      description: Get all merchants/users with their ID and store name
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Merchant'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: List all merchants (for Telegram bot)
+      tags:
+      - Telegram
+  /telegram/merchants/{merchant_id}/products:
+    get:
+      consumes:
+      - application/json
+      description: Get all products available from a specific merchant
+      parameters:
+      - description: Merchant User ID
+        in: path
+        name: merchant_id
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.ResponsePaginate'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Product'
+                  type: array
+                meta:
+                  $ref: '#/definitions/utils.Meta'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: List products by merchant (for Telegram bot)
+      tags:
+      - Telegram
+  /telegram/orders:
+    post:
+      consumes:
+      - application/json
+      description: Create a new order for a customer via telegram bot
+      parameters:
+      - description: Order details
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTelegramOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Order'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Create order for customer (Telegram bot)
+      tags:
+      - Telegram
+  /telegram/orders/{order_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a pending or cancelled order
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Delete customer order (Telegram bot)
+      tags:
+      - Telegram
+  /telegram/orders/{order_id}/cancel:
+    patch:
+      consumes:
+      - application/json
+      description: Cancel an order and restore stock
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Order'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Cancel customer order (Telegram bot)
+      tags:
+      - Telegram
+  /transactions:
+    post:
+      consumes:
+      - application/json
+      description: Create a new transaction for the authenticated user
+      parameters:
+      - description: Transaction details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTransactionPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Transaction created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TransactionResponse'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      summary: Create a new transaction
+      tags:
+      - Transactions
+  /transactions/date:
+    get:
+      consumes:
+      - application/json
+      description: Get all transactions for a specific date for the authenticated
+        user
+      parameters:
+      - description: Date in YYYY-MM-DD format
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transactions retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TransactionListResponse'
+              type: object
+        "400":
+          description: Invalid date format
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get transactions by date
+      tags:
+      - Transactions
+  /transactions/days:
+    get:
+      consumes:
+      - application/json
+      description: Get all transactions for the last N days for the authenticated
+        user
+      parameters:
+      - description: Number of days (e.g., 7, 30, 90)
+        in: query
+        name: days
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transactions retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TransactionListResponse'
+              type: object
+        "400":
+          description: Invalid days parameter
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get transactions for last N days
+      tags:
+      - Transactions
+  /transactions/range:
+    get:
+      consumes:
+      - application/json
+      description: Get all transactions within a date range for the authenticated
+        user
+      parameters:
+      - description: Start date in YYYY-MM-DD format
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End date in YYYY-MM-DD format
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transactions retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TransactionListResponse'
+              type: object
+        "400":
+          description: Invalid date format
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get transactions by date range
+      tags:
+      - Transactions
+  /transactions/source:
+    get:
+      consumes:
+      - application/json
+      description: Get transactions by source for a date range for the authenticated
+        user
+      parameters:
+      - description: Transaction source (receipt/whatsapp/manual)
+        in: query
+        name: source
+        required: true
+        type: string
+      - description: 'Start date in YYYY-MM-DD format (default: 30 days ago)'
+        in: query
+        name: start_date
+        type: string
+      - description: 'End date in YYYY-MM-DD format (default: today)'
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transactions retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TransactionListResponse'
+              type: object
+        "400":
+          description: Invalid parameters
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get transactions by source
+      tags:
+      - Transactions
+  /transactions/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get transaction statistics for a date range for the authenticated
+        user
+      parameters:
+      - description: 'Start date in YYYY-MM-DD format (default: 30 days ago)'
+        in: query
+        name: start_date
+        type: string
+      - description: 'End date in YYYY-MM-DD format (default: today)'
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Statistics retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TransactionStats'
+              type: object
+        "400":
+          description: Invalid date format
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get transaction statistics
+      tags:
+      - Transactions
+  /transactions/stats/days:
+    get:
+      consumes:
+      - application/json
+      description: Get transaction statistics for the last N days for the authenticated
+        user
+      parameters:
+      - description: 'Number of days (default: 30)'
+        in: query
+        name: days
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Statistics retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TransactionStats'
+              type: object
+        "400":
+          description: Invalid days parameter
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get transaction statistics for last N days
+      tags:
+      - Transactions
+  /transactions/type:
+    get:
+      consumes:
+      - application/json
+      description: Get transactions by type for a date range for the authenticated
+        user
+      parameters:
+      - description: Transaction type (income/expense)
+        in: query
+        name: type
+        required: true
+        type: string
+      - description: 'Start date in YYYY-MM-DD format (default: 30 days ago)'
+        in: query
+        name: start_date
+        type: string
+      - description: 'End date in YYYY-MM-DD format (default: today)'
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transactions retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TransactionListResponse'
+              type: object
+        "400":
+          description: Invalid parameters
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get transactions by type
+      tags:
+      - Transactions
+  /users/me:
+    delete:
+      consumes:
+      - application/json
+      description: Delete authenticated user's account permanently
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Delete user account
+      tags:
+      - Users
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the authenticated user's information from their JWT token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Session valid with user data
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.SessionResponse'
+              type: object
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "404":
+          description: User not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user session
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update authenticated user's profile information
+      parameters:
+      - description: User update details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                message:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
+tags:
+- description: Authentication endpoints for user registration and login
+  name: Auth
+- description: Operations related to user management
+  externalDocs:
+    description: User management documentation
+    url: https://example.com/docs/users
+  name: Users
+- description: Operations related to receipt
+  externalDocs:
+    url: https://example.com/docs/receipts
+  name: Receipts
+- description: Operations related to order processing
+  externalDocs:
+    url: https://example.com/docs/transactions
+  name: Transactions
+- description: Operations related to pruduct management
+  externalDocs:
+    url: https://example.com/docs/products
+  name: Product
+- description: Operations related to order management
+  externalDocs:
+    url: https://example.com/docs/orders
+  name: Orders
+- description: Operations related to customer management via Telegram bot
+  externalDocs:
+    url: https://example.com/docs/customers
+  name: Customers
+- description: Telegram bot endpoints for customer operations
+  externalDocs:
+    url: https://example.com/docs/telegram
+  name: Telegram
