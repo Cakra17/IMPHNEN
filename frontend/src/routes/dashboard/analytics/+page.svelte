@@ -79,7 +79,6 @@
 						return async ({ result }) => {
 							if (result.type === 'success') {
 								dailyTransactions = result.data?.dailyTransactions; // However your action returns it
-								console.log(dailyTransactions);
 							}
 						};
 					}}

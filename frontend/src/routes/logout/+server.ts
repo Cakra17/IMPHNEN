@@ -16,5 +16,5 @@ export const GET = ({ cookies }) => {
 	});
 
 	// redirect to login (or home)
-	throw redirect(302, '/');
+	throw redirect(302, '/auth/login');
 };

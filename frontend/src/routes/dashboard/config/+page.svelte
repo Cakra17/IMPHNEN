@@ -233,7 +233,6 @@
 		action="?/deleteProfile"
 		use:enhance={() => {
 			return async ({ result }) => {
-				console.log(result.type);
 				if (result.type === 'redirect') {
 					// Let the redirect happen
 					window.location.href = result.location;

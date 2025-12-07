@@ -18,7 +18,6 @@ export const load = async ({ cookies }) => {
 
 export const actions = {
 	getDaily: async ({ request, cookies }) => {
-		console.log('fetching daily data');
 		const data = await request.formData();
 		const dateString = data.get('date') as string;
 		const date = new Date(dateString);

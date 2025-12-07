@@ -1,4 +1,4 @@
-// Centralized API utility for making authenticated requests
+// Centralized API utility for making requests
 
 import { redirect } from '@sveltejs/kit';
 import type { Cookies } from '@sveltejs/kit';
@@ -8,16 +8,23 @@ export const API_BASE_URL = 'http://202.155.95.111/api/v1';
 interface ApiOptions {
 	method?: string;
 	body?: any;
-	cookies: Cookies;
+	// Made cookies optional (can be null/undefined)
+	cookies?: Cookies | null;
 	params?: Record<string, string | number | boolean>;
 }
 
 export async function apiCall(endpoint: string, options: ApiOptions) {
 	const { method = 'GET', body, cookies, params } = options;
 
-	const accessToken = cookies.get('access_token');
+	// Only attempt to get and check accessToken if 'cookies' are provided
+	let accessToken = null;
+	if (cookies) {
+		accessToken = cookies.get('access_token');
+	}
 
-	if (!accessToken) {
+	// Now, redirection only happens if cookies were provided AND the token is missing.
+	// If cookies are *not* provided, we proceed with an unauthenticated request.
+	if (cookies && !accessToken) {
 		throw redirect(302, '/auth/login');
 	}
 
@@ -34,10 +41,14 @@ export async function apiCall(endpoint: string, options: ApiOptions) {
 	 * Do NOT send Content-Type header for GET request
 	 * SvelteKit + JSON server = errors if you send Content-Type without body
 	 */
-	const headers: Record<string, string> = {
-		Authorization: `Bearer ${accessToken}`
-	};
+	const headers: Record<string, string> = {};
 
+	// Only add Authorization header if an accessToken exists
+	if (accessToken) {
+		headers['Authorization'] = `Bearer ${accessToken}`;
+	}
+
+	// Only set Content-Type if it's not GET and not FormData
 	if (method !== 'GET' && !(body instanceof FormData)) {
 		headers['Content-Type'] = 'application/json';
 	}
@@ -62,8 +73,8 @@ export async function apiCall(endpoint: string, options: ApiOptions) {
 		throw err;
 	}
 
-	// Handle expired auth
-	if (response.status === 401) {
+	// Handle expired auth (only if cookies are present, otherwise 401 is treated as a normal error)
+	if (cookies && response.status === 401) {
 		cookies.delete('access_token', { path: '/' });
 		cookies.delete('user_data', { path: '/' });
 
@@ -93,27 +104,46 @@ export async function apiCall(endpoint: string, options: ApiOptions) {
 }
 
 // Convenience methods
+// All methods now accept 'cookies' as a potentially null value.
+
+/**
+ * Type for optional cookies, allowing them to be omitted for public endpoints.
+ * @type {Cookies | null | undefined}
+ */
+type OptionalCookies = Cookies | null | undefined;
+
 export const api = {
-	get: (endpoint: string, cookies: Cookies, params?: Record<string, string | number | boolean>) =>
-		apiCall(endpoint, { method: 'GET', cookies, params }),
+	get: (
+		endpoint: string,
+		cookies?: OptionalCookies,
+		params?: Record<string, string | number | boolean>
+	) => apiCall(endpoint, { method: 'GET', cookies, params }),
 
 	post: (
 		endpoint: string,
 		body: any,
-		cookies: Cookies,
+		cookies?: OptionalCookies,
 		params?: Record<string, string | number | boolean>
 	) => apiCall(endpoint, { method: 'POST', body, cookies, params }),
 
 	put: (
 		endpoint: string,
 		body: any,
-		cookies: Cookies,
+		cookies?: OptionalCookies,
 		params?: Record<string, string | number | boolean>
 	) => apiCall(endpoint, { method: 'PUT', body, cookies, params }),
 
+	// Explicitly confirm PATCH support
+	patch: (
+		endpoint: string,
+		body: any,
+		cookies?: OptionalCookies,
+		params?: Record<string, string | number | boolean>
+	) => apiCall(endpoint, { method: 'PATCH', body, cookies, params }),
+
 	delete: (
 		endpoint: string,
-		cookies: Cookies,
+		cookies?: OptionalCookies,
 		params?: Record<string, string | number | boolean>
 	) => apiCall(endpoint, { method: 'DELETE', cookies, params })
 };

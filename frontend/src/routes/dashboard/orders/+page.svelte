@@ -16,11 +16,11 @@
 	import { ArrowLeftOutline, ArrowRightOutline, ChevronDownOutline } from 'flowbite-svelte-icons';
 
 	let { data } = $props();
-	let orders: Order[] = data.orders;
-	let meta: PaginationMeta = data.meta;
+	let orders: Order[] = $derived(data.orders);
+	let meta: PaginationMeta = $derived(data.meta);
 	const statuses = Object.keys(orderStatus); // ['Pending', 'Diterima', 'Dicancel']
 
-	let filters = data.filters;
+	let filters = $derived(data.filters);
 
 	let statusFilter = $derived($page.url.searchParams.get('status'));
 
@@ -35,7 +35,7 @@
 		}
 
 		params.set('page', '1'); // Reset to page 1 when filtering
-		goto(`?${params.toString()}`);
+		goto(`?${params.toString()}`, { invalidate: ['/dashboard/orders'] });
 	}
 
 	function changePage(newPage: number) {
