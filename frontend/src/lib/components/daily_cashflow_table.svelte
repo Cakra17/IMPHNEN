@@ -1,9 +1,29 @@
 <script lang="ts">
-	import { Heading } from 'flowbite-svelte';
+	import { Heading, P } from 'flowbite-svelte';
 	import { TrendingUpIcon, TrendingDownIcon, ChevronDownIcon } from '@lucide/svelte';
+	import { formatRupiah } from '$lib/utils/format_money';
+	import { transactionsSources, type Transaction } from '$lib/types/transaction';
 
 	let activeTab = $state<'income' | 'expense'>('income');
+
+	let { transactions = [] }: { transactions: Transaction[] } = $props();
+
+	// Split and calculate in one pass
+	let incomes = $derived(transactions.filter((t) => t.type === 'income') ?? []);
+	let expenses = $derived(transactions.filter((t) => t.type === 'expense') ?? []);
+
+	let totalIncome = $derived(incomes.reduce((sum, t) => sum + t.amount, 0));
+	let totalExpense = $derived(expenses.reduce((sum, t) => sum + t.amount, 0));
+	let netTotal = $derived(totalIncome - totalExpense);
 </script>
+
+<!-- Summary Section-->
+<div class="p-6 flex flex-col md:flex-row justify-between border-b border-teal-200">
+	<Heading class="text-xl">Net Total</Heading>
+	<Heading class={`text-xl mb-2 ${netTotal < 0 ? 'text-red-500' : 'text-emerald-500'}`}
+		>{formatRupiah(totalIncome - totalExpense)}</Heading
+	>
+</div>
 
 <!-- Mobile Tabs (visible on mobile only) -->
 <div class="lg:hidden flex border-b border-teal-300">
@@ -43,43 +63,34 @@
 		<div class="pb-4 flex flex-row justify-between">
 			<div>
 				<Heading class="text-lg hidden lg:block">Pemasukan</Heading>
-				<Heading class="text-2xl lg:text-xl mb-2 text-emerald-500">Rp 40.000</Heading>
+				<Heading class="text-2xl lg:text-xl mb-2 text-emerald-500"
+					>{formatRupiah(totalIncome)}</Heading
+				>
 			</div>
 			<TrendingUpIcon class="hidden lg:block" size={32} />
 		</div>
 		<div>
-			<div class="rounded-lg border border-teal-300 overflow-hidden bg-white">
-				<div
-					class="p-4 flex flex-row gap-6 items-center border-b border-teal-300 hover:bg-stone-50 active:bg-stone-50/30"
-				>
-					<div class="flex-1">
-						<Heading tag="h6" class="text-left">Penjualan Produk A</Heading>
-						<span class="text-sm mb-2">Terjual 10 Unit</span>
-					</div>
-					<ChevronDownIcon />
-					<Heading class="text-xl mb-2 text-emerald-500 self-start">+ Rp 10.000</Heading>
+			{#if incomes.length > 0}
+				<div class="rounded-lg border border-teal-300 overflow-hidden bg-white">
+					{#each incomes as tx, i}
+						<div
+							class={[
+								'p-4 flex flex-row gap-6 items-center hover:bg-stone-100/50 active:bg-stone-50/30',
+								i < transactions.length - 1 ? 'border-b border-teal-300' : ''
+							]}
+						>
+							<div class="flex-1">
+								<Heading tag="h6" class="text-left">{transactionsSources[tx.source]}</Heading>
+							</div>
+							<Heading class="text-xl mb-2 text-emerald-500 self-start"
+								>+ {formatRupiah(tx.amount)}</Heading
+							>
+						</div>
+					{/each}
 				</div>
-				<div
-					class="p-4 flex flex-row gap-6 items-center border-b border-teal-300 hover:bg-stone-50 active:bg-stone-50/30"
-				>
-					<div class="flex-1">
-						<Heading tag="h6" class="text-left">Penjualan Produk B</Heading>
-						<span class="text-sm mb-2">Terjual 15 Unit</span>
-					</div>
-					<ChevronDownIcon />
-					<Heading class="text-xl mb-2 text-emerald-500 self-start">+ Rp 15.000</Heading>
-				</div>
-				<div
-					class="p-4 flex flex-row gap-6 items-center border-b border-teal-300 hover:bg-stone-50 active:bg-stone-50/30"
-				>
-					<div class="flex-1">
-						<Heading tag="h6" class="text-left">Penjualan Produk C</Heading>
-						<span class="text-sm mb-2">Terjual 3 Unit</span>
-					</div>
-					<ChevronDownIcon />
-					<Heading class="text-xl mb-2 text-emerald-500 self-start">+ Rp 15.000</Heading>
-				</div>
-			</div>
+			{:else}
+				<div class="py-12"><P align="center">Tidak ada transaksi masuk</P></div>
+			{/if}
 		</div>
 	</div>
 
@@ -92,22 +103,33 @@
 		<div class="pb-4 flex flex-row justify-between">
 			<div>
 				<Heading class="hidden lg:block text-lg">Pengeluaran</Heading>
-				<Heading class="text-2xl lg:text-xl mb-2 text-red-500">Rp 10.000</Heading>
+				<Heading class="text-2xl lg:text-xl mb-2 text-red-500">{formatRupiah(totalExpense)}</Heading
+				>
 			</div>
 			<TrendingDownIcon class="hidden lg:block" size={32} />
 		</div>
 		<div>
-			<div class="rounded-lg border border-teal-300 overflow-hidden bg-white">
-				<div
-					class="p-4 flex flex-row gap-6 items-center border-b border-teal-300 hover:bg-stone-100/50 active:bg-stone-50/30"
-				>
-					<div class="flex-1">
-						<Heading tag="h6" class="text-left">Setoran Ormas</Heading>
-						<span class="text-sm mb-2">Tagihan</span>
-					</div>
-					<Heading class="text-xl mb-2 text-red-500 self-start">- Rp 10.000</Heading>
+			{#if expenses.length > 0}
+				<div class="rounded-lg border border-teal-300 overflow-hidden bg-white">
+					{#each expenses as tx, i}
+						<div
+							class={[
+								'p-4 flex flex-row gap-6 items-center hover:bg-stone-100/50 active:bg-stone-50/30',
+								i < transactions.length - 1 ? 'border-b border-teal-300' : ''
+							]}
+						>
+							<div class="flex-1">
+								<Heading tag="h6" class="text-left">{transactionsSources[tx.source]}</Heading>
+							</div>
+							<Heading class="text-xl mb-2 text-red-500 self-start"
+								>- {formatRupiah(tx.amount)}</Heading
+							>
+						</div>
+					{/each}
 				</div>
-			</div>
+			{:else}
+				<div class="py-12"><P align="center">Tidak ada transaksi keluar</P></div>
+			{/if}
 		</div>
 	</div>
 </div>

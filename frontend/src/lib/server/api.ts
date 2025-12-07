@@ -1,4 +1,3 @@
-// src/lib/server/api.ts
 // Centralized API utility for making authenticated requests
 
 import { redirect } from '@sveltejs/kit';
@@ -19,66 +18,77 @@ export async function apiCall(endpoint: string, options: ApiOptions) {
 	const accessToken = cookies.get('access_token');
 
 	if (!accessToken) {
-		// No token = redirect to login
 		throw redirect(302, '/auth/login');
 	}
 
-	// Build URL with query parameters
+	// Build URL
 	let url = `${API_BASE_URL}${endpoint}`;
+
 	if (params) {
-		const queryString = new URLSearchParams(
-			Object.entries(params).map(([key, value]) => [key, String(value)])
-		).toString();
-		url += `?${queryString}`;
+		const query = new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)]));
+		if (query.toString()) url += `?${query}`;
 	}
 
-	// Create abort controller for timeout
-	const controller = new AbortController();
-	const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+	/**
+	 * ⚠️ IMPORTANT:
+	 * Do NOT send Content-Type header for GET request
+	 * SvelteKit + JSON server = errors if you send Content-Type without body
+	 */
+	const headers: Record<string, string> = {
+		Authorization: `Bearer ${accessToken}`
+	};
+
+	if (method !== 'GET' && !(body instanceof FormData)) {
+		headers['Content-Type'] = 'application/json';
+	}
+
+	let fetchOptions: RequestInit = {
+		method,
+		headers
+	};
+
+	if (body) {
+		fetchOptions.body = body instanceof FormData ? body : JSON.stringify(body);
+	}
+
+	let response: Response;
 
 	try {
-		const response = await fetch(url, {
-			method,
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`
-			},
-			body: body ? JSON.stringify(body) : undefined,
-			signal: controller.signal
-		});
-
-		clearTimeout(timeoutId);
-
-		// Handle 401 Unauthorized - token expired or invalid
-		if (response.status === 401) {
-			// Clear cookies and redirect to login
-			cookies.delete('access_token', { path: '/' });
-			cookies.delete('user_data', { path: '/' });
-			throw redirect(302, '/auth/login?session=expired');
+		response = await fetch(url, fetchOptions);
+	} catch (err) {
+		if (err instanceof Error && err.name === 'AbortError') {
+			throw new Error('Request timeout - server tidak merespons');
 		}
+		throw err;
+	}
 
-		// Handle other error status codes
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-			console.error('API Error Details:', {
-				status: response.status,
-				statusText: response.statusText,
-				url: url,
-				errorData
-			});
-			throw new Error(errorData.message || `API Error: ${response.status} ${response.statusText}`);
+	// Handle expired auth
+	if (response.status === 401) {
+		cookies.delete('access_token', { path: '/' });
+		cookies.delete('user_data', { path: '/' });
+
+		throw redirect(302, '/auth/login?session=expired');
+	}
+
+	// Handle other error codes
+	if (!response.ok) {
+		let message = `API Error: ${response.status} ${response.statusText}`;
+		try {
+			const data = await response.json();
+			if (data?.message) message = data.message;
+		} catch {
+			// Response wasn't JSON
 		}
+		throw new Error(message);
+	}
 
-		return response.json();
-	} catch (error) {
-		clearTimeout(timeoutId);
+	// Handle non-JSON (204, empty body, etc)
+	if (response.status === 204) return null;
 
-		if (error instanceof Error && error.name === 'AbortError') {
-			console.error('API Request Timeout:', url);
-			throw new Error('Request timeout - API server tidak merespons');
-		}
-
-		throw error;
+	try {
+		return await response.json();
+	} catch {
+		return null;
 	}
 }
 

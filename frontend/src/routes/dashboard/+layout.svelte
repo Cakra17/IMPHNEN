@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Heading, Navbar, NavBrand, NavLi, NavUl, P } from 'flowbite-svelte';
+	import { Heading, Navbar, NavBrand, NavLi, NavUl, P, Tooltip } from 'flowbite-svelte';
 	import { BellIcon, ChevronDownIcon, LogOutIcon } from '@lucide/svelte';
 	import Logo from '$lib/components/logo.svelte';
 	import { page } from '$app/state';
@@ -15,9 +15,9 @@
 	}
 </script>
 
-<div class="font-jakarta w-full h-screen overflow-x-hidden bg-stone-50">
+<div class="font-jakarta w-[100%] h-screen overflow-x-hidden bg-stone-50">
 	<nav
-		class="sticky top-0 z-50 h-14 lg:h-18 bg-white w-full px-4 md:px-12 lg:px-16 xl:px-36 border-b border-teal-200 flex flex-row items-center justify-between"
+		class="sticky top-0 z-50 h-14 lg:h-18 bg-white w-full px-4 md:px-8 lg:px-16 xl:px-36 border-b border-teal-200 flex flex-row items-center justify-between"
 	>
 		<!-- Logo Section -->
 		<a href="/dashboard" class="flex-1 flex flex-row items-center gap-2">
@@ -30,16 +30,17 @@
 		<!-- User Profile Section -->
 		<div class="flex-1 flex flex-row py-2 h-full gap-4 justify-end items-center">
 			<div class="hidden md:flex flex-col items-end">
-				<P weight="semibold" size="sm" align="right">{data.user?.firstname}</P>
+				<P weight="semibold" size="sm" align="right">{data.user?.firstname} {data.user?.lastname}</P
+				>
 				<P size="xs" align="right">{data.user?.store_name}</P>
 			</div>
-			<div class="shrink-0 w-10 h-10 hidden md:block bg-blue-500 rounded-full"></div>
 			<button class="cursor-pointer" type="button" onclick={handleLogout}>
 				<LogOutIcon />
 			</button>
+			<Tooltip>Keluar dari Akun</Tooltip>
 		</div>
 	</nav>
-	<div class="w-full px-4 md:px-12 lg:px-16 xl:px-36 py-8">
+	<div class="w-full px-4 md:px-8 lg:px-16 xl:px-36 py-4 md:py-8">
 		{@render children()}
 	</div>
 </div>

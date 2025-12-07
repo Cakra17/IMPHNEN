@@ -7,7 +7,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 			days: 1
 		});
 		const txTodayData = await api.get('/transactions/days', cookies, {
-			days: 1
+			days: 30
 		});
 		console.log(txTodayData);
 		console.log(summaryData);
@@ -47,6 +47,18 @@ export const actions: Actions = {
 		const result = await api.post('/transactions', body, cookies);
 
 		// --- 3. Return something to page ---
+		return {
+			success: true,
+			result
+		};
+	},
+	postReceiptImage: async ({ request, cookies }) => {
+		const form = await request.formData();
+
+		const result = await api.post('/receipts', form, cookies);
+
+		console.log(result);
+
 		return {
 			success: true,
 			result

@@ -100,11 +100,12 @@ export function formatRelativeTime(date: string | Date, limit: number = 7): stri
 }
 
 /**
- * Format to DD/MM/YYYY
+ * Format to DD-MM-YYY with a customizable separator
  * @param date - Date string or Date object
+ * @param separator - Date separator. Defaults to '-'
  * @returns Formatted string like "06/12/2025"
  */
-export function formatDateSlash(date: string | Date): string {
+export function formatDateSeparator(date: string | Date, separator: string = '-'): string {
 	const dateObj = typeof date === 'string' ? new Date(date) : date;
 
 	if (isNaN(dateObj.getTime())) {
@@ -115,15 +116,53 @@ export function formatDateSlash(date: string | Date): string {
 	const month = String(dateObj.getMonth() + 1).padStart(2, '0');
 	const year = dateObj.getFullYear();
 
-	return `${day}/${month}/${year}`;
+	return `${day}${separator}${month}${separator}${year}`;
 }
 
 /**
- * Parse DD/MM/YYYY back to Date
- * @param dateStr - Date string in DD/MM/YYYY format
+ * Parse DD-MM-YYYY back to Date with a customizable separator
+ * @param dateStr - Date string in DD-MM-YYYY format
+ * @param separator - Actual separator used on the date string
  * @returns Date object
  */
-export function parseDateSlash(dateStr: string): Date {
-	const [day, month, year] = dateStr.split('/');
+export function parseDateSeparator(dateStr: string, separator: string = '-'): Date {
+	const [day, month, year] = dateStr.split(separator);
 	return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+}
+
+/**
+ * Format to YYYY-MM-DD which is expected by the backend
+ * @param date - Date string or Date object
+ * @param separator - Date separator. Defaults to '-'
+ * @returns Formatted string like "06/12/2025"
+ */
+export function formatDateForBackend(date: string | Date): string {
+	const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+	if (isNaN(dateObj.getTime())) {
+		return 'Invalid date';
+	}
+
+	const day = String(dateObj.getDate()).padStart(2, '0');
+	const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+	const year = dateObj.getFullYear();
+
+	return `${year}-${month}-${day}`;
+}
+
+export function formatDateTime(dateString: string): string {
+	const date = new Date(dateString);
+
+	// Format: "7 Desember 2025, 06.00"
+	const formatted = date.toLocaleString('id-ID', {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: false
+	});
+
+	// Replace the colon with a period for Indonesian style
+	return formatted.replace('pukul', '| ').replace(':', '.').trim();
 }
