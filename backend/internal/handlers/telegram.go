@@ -14,29 +14,30 @@ import (
 	"github.com/google/uuid"
 )
 
-// TelegramHandler handles telegram bot operations for customers/clients
-// Allows customers to: list products, create orders, list their orders, and cancel/delete orders
 type TelegramHandler struct {
 	orderRepo   store.OrderRepo
 	productRepo store.ProductRepo
+	userRepo    store.UserRepo
 }
 
 type TelegramHandlerConfig struct {
 	OrderRepo   store.OrderRepo
 	ProductRepo store.ProductRepo
+	UserRepo    store.UserRepo
 }
 
 func NewTelegramHandler(cfg TelegramHandlerConfig) TelegramHandler {
 	return TelegramHandler{
 		orderRepo:   cfg.OrderRepo,
 		productRepo: cfg.ProductRepo,
+		userRepo:    cfg.UserRepo,
 	}
 }
 
 // ListProductsByMerchant lists all products from a specific merchant
 // @Summary List products by merchant (for Telegram bot)
 // @Description Get all products available from a specific merchant
-// @Tags telegram
+// @Tags Telegram
 // @Accept json
 // @Produce json
 // @Param merchant_id path string true "Merchant User ID"
@@ -100,7 +101,7 @@ func (h *TelegramHandler) ListProductsByMerchant(w http.ResponseWriter, r *http.
 // CreateOrderForCustomer creates a new order from telegram bot (customer side)
 // @Summary Create order for customer (Telegram bot)
 // @Description Create a new order for a customer via telegram bot
-// @Tags telegram
+// @Tags Telegram
 // @Accept json
 // @Produce json
 // @Param order body models.CreateTelegramOrderRequest true "Order details"
@@ -203,7 +204,7 @@ func (h *TelegramHandler) CreateOrderForCustomer(w http.ResponseWriter, r *http.
 // ListCustomerOrders lists all orders for a specific customer
 // @Summary List customer orders (Telegram bot)
 // @Description Get all orders for a specific customer
-// @Tags telegram
+// @Tags Telegram
 // @Accept json
 // @Produce json
 // @Param customer_id path string true "Customer ID"
@@ -273,7 +274,7 @@ func (h *TelegramHandler) ListCustomerOrders(w http.ResponseWriter, r *http.Requ
 // CancelCustomerOrder cancels an order (customer side)
 // @Summary Cancel customer order (Telegram bot)
 // @Description Cancel an order and restore stock
-// @Tags telegram
+// @Tags Telegram
 // @Accept json
 // @Produce json
 // @Param order_id path string true "Order ID"
@@ -338,7 +339,7 @@ func (h *TelegramHandler) CancelCustomerOrder(w http.ResponseWriter, r *http.Req
 // DeleteCustomerOrder deletes an order (customer side)
 // @Summary Delete customer order (Telegram bot)
 // @Description Delete a pending or cancelled order
-// @Tags telegram
+// @Tags Telegram
 // @Accept json
 // @Produce json
 // @Param order_id path string true "Order ID"
@@ -388,5 +389,31 @@ func (h *TelegramHandler) DeleteCustomerOrder(w http.ResponseWriter, r *http.Req
 
 	utils.ResponseJson(w, http.StatusOK, utils.Response{
 		Message: "Berhasil menghapus pesanan",
+	})
+}
+
+// GetAllMerchants lists all merchants/users with their ID and store name
+// @Summary List all merchants (for Telegram bot)
+// @Description Get all merchants/users with their ID and store name
+// @Tags Telegram
+// @Accept json
+// @Produce json
+// @Success 200 {object} utils.Response{data=[]models.Merchant}
+// @Failure 500 {object} utils.Response
+// @Router /telegram/merchants [get]
+func (h *TelegramHandler) GetAllMerchants(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	merchants, err := h.userRepo.GetAllUsers(ctx)
+	if err != nil {
+		utils.ResponseJson(w, http.StatusInternalServerError, utils.Response{
+			Message: "Gagal mendapatkan daftar merchant",
+		})
+		return
+	}
+
+	utils.ResponseJson(w, http.StatusOK, utils.Response{
+		Message: "Berhasil mendapatkan daftar merchant",
+		Data:    merchants,
 	})
 }

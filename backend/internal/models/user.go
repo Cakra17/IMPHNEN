@@ -41,3 +41,8 @@ type UserResponse struct {
 type SessionResponse struct {
 	User User `json:"user"`
 }
+
+type Merchant struct {
+	MerchantID   string `json:"merchant_id" db:"id"`
+	MerchantName string `json:"merchant_name" db:"store_name"`
+}

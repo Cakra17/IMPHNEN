@@ -19,7 +19,6 @@ func NewOrderRepo(db *sql.DB) OrderRepo {
 	return OrderRepo{db: db}
 }
 
-// CreateOrder creates a new order with its items in a transaction with race condition prevention
 func (r *OrderRepo) CreateOrder(ctx context.Context, order *models.Order, items []models.OrderItem) error {
 	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelReadCommitted,
@@ -36,7 +35,6 @@ func (r *OrderRepo) CreateOrder(ctx context.Context, order *models.Order, items 
 		}
 	}()
 
-	// Lock products and verify stock availability
 	productIDs := make([]string, len(items))
 	requestedQuantities := make(map[string]int)
 	for i, item := range items {
@@ -44,7 +42,6 @@ func (r *OrderRepo) CreateOrder(ctx context.Context, order *models.Order, items 
 		requestedQuantities[item.ProductID] = item.Quantity
 	}
 
-	// Lock products for update to prevent race conditions
 	query := `
 		SELECT id, stock, price 
 		FROM products 
@@ -79,7 +76,6 @@ func (r *OrderRepo) CreateOrder(ctx context.Context, order *models.Order, items 
 		return fmt.Errorf("one or more products not found or don't belong to user")
 	}
 
-	// Verify stock availability
 	for productID, requestedQty := range requestedQuantities {
 		availableStock, exists := productStockMap[productID]
 		if !exists {
@@ -91,7 +87,6 @@ func (r *OrderRepo) CreateOrder(ctx context.Context, order *models.Order, items 
 		}
 	}
 
-	// Verify customer exists
 	var customerExists bool
 	err = tx.QueryRowContext(ctx,
 		`SELECT EXISTS(SELECT 1 FROM customers WHERE id = $1)`,
@@ -104,14 +99,12 @@ func (r *OrderRepo) CreateOrder(ctx context.Context, order *models.Order, items 
 		return fmt.Errorf("customer not found")
 	}
 
-	// Calculate total price and update stock
 	var totalPrice float64
 	for i := range items {
 		price := productPriceMap[items[i].ProductID]
 		items[i].TotalPrice = price * float64(items[i].Quantity)
 		totalPrice += items[i].TotalPrice
 
-		// Update stock
 		updateStockQuery := `
 			UPDATE products 
 			SET stock = stock - $1 
@@ -136,7 +129,6 @@ func (r *OrderRepo) CreateOrder(ctx context.Context, order *models.Order, items 
 
 	order.TotalPrice = totalPrice
 
-	// Insert order
 	orderQuery := `
 		INSERT INTO orders(id, user_id, customer_id, total_price, status, order_date, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -153,7 +145,6 @@ func (r *OrderRepo) CreateOrder(ctx context.Context, order *models.Order, items 
 		return err
 	}
 
-	// Insert order items
 	for _, item := range items {
 		itemQuery := `
 			INSERT INTO order_items(id, order_id, product_id, quantity, total_price, created_at)
@@ -179,7 +170,6 @@ func (r *OrderRepo) CreateOrder(ctx context.Context, order *models.Order, items 
 	return nil
 }
 
-// GetOrderByID retrieves an order by ID with its items and customer details
 func (r *OrderRepo) GetOrderByID(ctx context.Context, orderID string) (*models.Order, error) {
 	query := `
 		SELECT 
@@ -207,7 +197,6 @@ func (r *OrderRepo) GetOrderByID(ctx context.Context, orderID string) (*models.O
 
 	order.Customer = &customer
 
-	// Get order items
 	items, err := r.getOrderItems(ctx, orderID)
 	if err != nil {
 		return nil, err
@@ -217,7 +206,6 @@ func (r *OrderRepo) GetOrderByID(ctx context.Context, orderID string) (*models.O
 	return &order, nil
 }
 
-// getOrderItems retrieves order items for a given order
 func (r *OrderRepo) getOrderItems(ctx context.Context, orderID string) ([]models.OrderItem, error) {
 	query := `
 		SELECT 
@@ -253,7 +241,6 @@ func (r *OrderRepo) getOrderItems(ctx context.Context, orderID string) ([]models
 			return nil, err
 		}
 
-		// Attach product if it exists
 		if productID.Valid {
 			product.ID = productID.String
 			product.Name = productName.String
@@ -269,7 +256,6 @@ func (r *OrderRepo) getOrderItems(ctx context.Context, orderID string) ([]models
 	return items, nil
 }
 
-// GetOrders retrieves orders with filtering and pagination
 func (r *OrderRepo) GetOrders(ctx context.Context, filter models.OrderFilter) ([]models.Order, uint, error) {
 	whereConditions := []string{"o.user_id = $1"}
 	args := []interface{}{filter.UserID}
@@ -289,7 +275,6 @@ func (r *OrderRepo) GetOrders(ctx context.Context, filter models.OrderFilter) ([
 
 	whereClause := strings.Join(whereConditions, " AND ")
 
-	// Get total count
 	var totalCount uint
 	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM orders o WHERE %s`, whereClause)
 	err := r.db.QueryRowContext(ctx, countQuery, args...).Scan(&totalCount)
@@ -298,7 +283,6 @@ func (r *OrderRepo) GetOrders(ctx context.Context, filter models.OrderFilter) ([
 		return nil, 0, err
 	}
 
-	// Get orders
 	offset := (filter.Page - 1) * filter.PerPage
 	argCount++
 	limitArg := argCount
@@ -341,7 +325,6 @@ func (r *OrderRepo) GetOrders(ctx context.Context, filter models.OrderFilter) ([
 
 		order.Customer = &customer
 
-		// Get order items for each order
 		items, err := r.getOrderItems(ctx, order.ID)
 		if err != nil {
 			return nil, 0, err
@@ -354,7 +337,6 @@ func (r *OrderRepo) GetOrders(ctx context.Context, filter models.OrderFilter) ([
 	return orders, totalCount, nil
 }
 
-// GetOrdersByCustomer retrieves orders for a specific customer (merchant filtered)
 func (r *OrderRepo) GetOrdersByCustomer(ctx context.Context, userID string, customerID string, page, perPage uint) ([]models.Order, uint, error) {
 	filter := models.OrderFilter{
 		UserID:     userID,
@@ -365,7 +347,6 @@ func (r *OrderRepo) GetOrdersByCustomer(ctx context.Context, userID string, cust
 	return r.GetOrders(ctx, filter)
 }
 
-// GetOrdersByCustomerOnly retrieves orders for a specific customer across all merchants (for telegram bot)
 func (r *OrderRepo) GetOrdersByCustomerOnly(ctx context.Context, filter models.OrderFilter) ([]models.Order, uint, error) {
 	whereConditions := []string{}
 	args := []interface{}{}
@@ -387,7 +368,6 @@ func (r *OrderRepo) GetOrdersByCustomerOnly(ctx context.Context, filter models.O
 
 	whereClause := strings.Join(whereConditions, " AND ")
 
-	// Get total count
 	var totalCount uint
 	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM orders o WHERE %s`, whereClause)
 	err := r.db.QueryRowContext(ctx, countQuery, args...).Scan(&totalCount)
@@ -396,7 +376,6 @@ func (r *OrderRepo) GetOrdersByCustomerOnly(ctx context.Context, filter models.O
 		return nil, 0, err
 	}
 
-	// Get orders
 	offset := (filter.Page - 1) * filter.PerPage
 	argCount++
 	limitArg := argCount
@@ -439,7 +418,6 @@ func (r *OrderRepo) GetOrdersByCustomerOnly(ctx context.Context, filter models.O
 
 		order.Customer = &customer
 
-		// Get order items for each order
 		items, err := r.getOrderItems(ctx, order.ID)
 		if err != nil {
 			return nil, 0, err
@@ -452,7 +430,6 @@ func (r *OrderRepo) GetOrdersByCustomerOnly(ctx context.Context, filter models.O
 	return orders, totalCount, nil
 }
 
-// UpdateOrderStatus updates order status with stock restoration for cancelled orders
 func (r *OrderRepo) UpdateOrderStatus(ctx context.Context, orderID string, newStatus models.OrderStatus) error {
 	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelReadCommitted,
@@ -469,7 +446,6 @@ func (r *OrderRepo) UpdateOrderStatus(ctx context.Context, orderID string, newSt
 		}
 	}()
 
-	// Lock and get current order status
 	var currentStatus models.OrderStatus
 	getOrderQuery := `
 		SELECT status 
@@ -486,7 +462,6 @@ func (r *OrderRepo) UpdateOrderStatus(ctx context.Context, orderID string, newSt
 		return err
 	}
 
-	// Validate status transition
 	if currentStatus == models.OrderStatusCancelled {
 		return fmt.Errorf("cannot update status of cancelled order")
 	}
@@ -495,7 +470,6 @@ func (r *OrderRepo) UpdateOrderStatus(ctx context.Context, orderID string, newSt
 		return fmt.Errorf("cannot revert confirmed order to pending")
 	}
 
-	// Update order status
 	updateStatusQuery := `UPDATE orders SET status = $1 WHERE id = $2`
 	_, err = tx.ExecContext(ctx, updateStatusQuery, newStatus, orderID)
 	if err != nil {
@@ -503,9 +477,7 @@ func (r *OrderRepo) UpdateOrderStatus(ctx context.Context, orderID string, newSt
 		return err
 	}
 
-	// Restore stock if cancelling a non-cancelled order
 	if newStatus == models.OrderStatusCancelled && currentStatus != models.OrderStatusCancelled {
-		// Get order items
 		getItemsQuery := `
 			SELECT product_id, quantity 
 			FROM order_items 
@@ -520,7 +492,6 @@ func (r *OrderRepo) UpdateOrderStatus(ctx context.Context, orderID string, newSt
 
 		restockQty := make(map[string]int)
 
-		// Restore stock for each item
 		for rows.Next() {
 			var productID string
 			var quantity int
@@ -555,7 +526,6 @@ func (r *OrderRepo) UpdateOrderStatus(ctx context.Context, orderID string, newSt
 	return nil
 }
 
-// DeleteOrder deletes an order and restores stock (only for pending orders)
 func (r *OrderRepo) DeleteOrder(ctx context.Context, orderID string) error {
 	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelReadCommitted,
@@ -572,7 +542,6 @@ func (r *OrderRepo) DeleteOrder(ctx context.Context, orderID string) error {
 		}
 	}()
 
-	// Lock and get order info
 	var status models.OrderStatus
 	getOrderQuery := `
 		SELECT status 
@@ -589,12 +558,10 @@ func (r *OrderRepo) DeleteOrder(ctx context.Context, orderID string) error {
 		return err
 	}
 
-	// Only allow deletion of pending or cancelled orders
 	if status != models.OrderStatusPending && status != models.OrderStatusCancelled {
 		return fmt.Errorf("can only delete pending or cancelled orders")
 	}
 
-	// Restore stock only for pending orders
 	if status == models.OrderStatusPending {
 		getItemsQuery := `
 			SELECT product_id, quantity 
@@ -629,7 +596,6 @@ func (r *OrderRepo) DeleteOrder(ctx context.Context, orderID string) error {
 		}
 	}
 
-	// Delete order items (will be deleted by CASCADE, but explicit for clarity)
 	deleteItemsQuery := `DELETE FROM order_items WHERE order_id = $1`
 	_, err = tx.ExecContext(ctx, deleteItemsQuery, orderID)
 	if err != nil {
@@ -637,7 +603,6 @@ func (r *OrderRepo) DeleteOrder(ctx context.Context, orderID string) error {
 		return err
 	}
 
-	// Delete order
 	deleteOrderQuery := `DELETE FROM orders WHERE id = $1`
 	_, err = tx.ExecContext(ctx, deleteOrderQuery, orderID)
 	if err != nil {
@@ -653,7 +618,6 @@ func (r *OrderRepo) DeleteOrder(ctx context.Context, orderID string) error {
 	return nil
 }
 
-// GetCustomerByID retrieves customer by ID
 func (r *OrderRepo) GetCustomerByID(ctx context.Context, customerID int) (*models.Customer, error) {
 	query := `
 		SELECT id, name, address, phone, created_at

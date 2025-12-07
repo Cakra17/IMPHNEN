@@ -11,8 +11,6 @@ import (
 	"github.com/Cakra17/imphnen/internal/utils"
 )
 
-// OrderHandler handles merchant-specific order operations
-// Merchants can only see and manage orders that belong to them
 type OrderHandler struct {
 	orderRepo store.OrderRepo
 }
@@ -30,7 +28,7 @@ func NewOrderHandler(cfg OrderHandlerConfig) OrderHandler {
 // GetOrders retrieves orders for the authenticated user (merchant) with filtering
 // @Summary Get all orders for merchant
 // @Description Retrieve orders with optional filtering by customer and status
-// @Tags orders
+// @Tags Orders
 // @Accept json
 // @Produce json
 // @Param page query int false "Page number" default(1)
@@ -116,7 +114,7 @@ func (h *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 // GetOrderByID retrieves a specific order by ID
 // @Summary Get order by ID
 // @Description Retrieve a specific order with its items and customer details
-// @Tags orders
+// @Tags Orders
 // @Accept json
 // @Produce json
 // @Param id path string true "Order ID"
@@ -174,7 +172,7 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 // GetOrdersByCustomer retrieves all orders for a specific customer
 // @Summary Get orders by customer
 // @Description Retrieve all orders for a specific customer
-// @Tags orders
+// @Tags Orders
 // @Accept json
 // @Produce json
 // @Param customer_id path string true "Customer ID"
@@ -246,7 +244,7 @@ func (h *OrderHandler) GetOrdersByCustomer(w http.ResponseWriter, r *http.Reques
 // UpdateOrderStatus updates the status of an order
 // @Summary Update order status
 // @Description Update order status (pending, confirmed, cancelled) with automatic stock restoration
-// @Tags orders
+// @Tags Orders
 // @Accept json
 // @Produce json
 // @Param id path string true "Order ID"

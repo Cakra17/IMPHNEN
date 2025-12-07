@@ -79,3 +79,36 @@ func (r *UserRepo) DeleteUser(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
+func (r *UserRepo) GetAllUsers(ctx context.Context) ([]models.Merchant, error) {
+	query := `
+		SELECT id, store_name 
+		FROM users 
+		ORDER BY created_at DESC
+	`
+
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		log.Printf("[ERROR] Failed to get all users: %s", err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	var merchants []models.Merchant
+	for rows.Next() {
+		var merchant models.Merchant
+		err := rows.Scan(&merchant.MerchantID, &merchant.MerchantName)
+		if err != nil {
+			log.Printf("[ERROR] Failed to scan user: %s", err.Error())
+			return nil, err
+		}
+		merchants = append(merchants, merchant)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Printf("[ERROR] Failed to iterate users: %s", err.Error())
+		return nil, err
+	}
+
+	return merchants, nil
+}

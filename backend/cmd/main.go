@@ -140,6 +140,7 @@ func main() {
 	telegramHandler := handlers.NewTelegramHandler(handlers.TelegramHandlerConfig{
 		OrderRepo:   orderRepo,
 		ProductRepo: productRepo,
+		UserRepo:    userRepo,
 	})
 
 	customerHandler := handlers.NewCustomerHandler(handlers.CustomerHandlerConfig{
@@ -202,6 +203,7 @@ func main() {
 			r.Get("/customers/{customer_id}/orders", telegramHandler.ListCustomerOrders)
 			r.Patch("/orders/{order_id}/cancel", telegramHandler.CancelCustomerOrder)
 			r.Delete("/orders/{order_id}", telegramHandler.DeleteCustomerOrder)
+			r.Get("/merchants", telegramHandler.GetAllMerchants)
 
 			r.Route("/customers", func(r chi.Router) {
 				r.Post("/", customerHandler.CreateCustomer)
